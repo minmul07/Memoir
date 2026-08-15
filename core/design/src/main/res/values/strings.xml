@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Memoir</string>
+
+    <string name="action_back">뒤로</string>
+    <string name="action_continue">계속</string>
+    <string name="action_done">완료</string>
+    <string name="action_agree">동의</string>
+    <string name="action_disagree">비동의</string>
+    <string name="action_delete">삭제</string>
+    <string name="action_more">더보기</string>
+    <string name="action_cancel_analysis">분석 취소</string>
+    <string name="action_add_to_queue">큐에 추가</string>
+
+    <string name="nav_dashboard">대시보드</string>
+    <string name="nav_queue">큐</string>
+    <string name="nav_settings">설정</string>
+    <string name="nav_archive">보관함</string>
+    <string name="nav_analysis_history">분석 기록</string>
+    <string name="nav_item_detail">항목 상세</string>
+    <string name="nav_model_management">모델 관리</string>
+    <string name="nav_developer_options">개발자 옵션</string>
+
+    <string name="onboarding_welcome">환영합니다</string>
+    <string name="onboarding_permission_title">권한 안내</string>
+    <string name="onboarding_permission_body">사진 접근 권한이 필요합니다.</string>
+    <string name="onboarding_crashlytics_title">비정상 종료 보고서</string>
+    <string name="onboarding_crashlytics_body">오류 보고서를 보낼지 선택합니다.</string>
+    <string name="onboarding_model_setup_title">모델 설정</string>
+
+    <string name="home_recent_section">최근 정리된 항목</string>
+    <string name="home_recent_item">최근 항목</string>
+    <string name="home_review_section">확인해야 하는 목록</string>
+    <string name="home_empty">없음</string>
+    <string name="archive_item">보관함 항목</string>
+    <string name="item_detail_empty_analysis">분석 원문이 없습니다.</string>
+
+    <string name="queue_current">현재 큐</string>
+    <string name="queue_pending_item">대기 항목</string>
+    <string name="queue_analyze_now">즉시 분석</string>
+    <string name="history_filter_cancelled">취소</string>
+    <string name="history_filter_failed">실패</string>
+    <string name="history_filter_completed">완료</string>
+    <string name="history_item">기록 항목</string>
+
+    <string name="settings_section_model">모델</string>
+    <string name="settings_section_user">사용자 설정</string>
+    <string name="settings_language">언어</string>
+    <string name="settings_theme">테마</string>
+    <string name="settings_notification">알림</string>
+    <string name="settings_section_queue">분석 큐 관리</string>
+    <string name="settings_in_use">사용 중</string>
+    <string name="settings_scheduled_analysis">예약 시간에 분석</string>
+    <string name="settings_sleep_analysis">자는 동안 분석</string>
+    <string name="settings_section_data">데이터</string>
+    <string name="settings_export">내보내기</string>
+    <string name="settings_import">가져오기</string>
+    <string name="settings_section_about">정보</string>
+    <string name="settings_app_info">앱 정보</string>
+    <string name="settings_open_source_licenses">오픈소스 라이선스</string>
+    <string name="developer_reset_onboarding">온보딩 진행도 초기화</string>
+
+    <string name="model_section_multimodal">멀티모달</string>
+    <string name="model_gemma_4_e4b">Gemma 4 E4B</string>
+    <string name="model_gemma_4_e2b">Gemma 4 E2B</string>
+    <string name="model_section_ocr">OCR</string>
+    <string name="model_mlkit_text_recognition_v2">ML Kit Text Recognition v2</string>
+    <string name="model_section_embedding">임베딩</string>
+    <string name="model_embedding_gemma">EmbeddingGemma</string>
+
+    <string name="preview_title">Title Text</string>
+    <string name="preview_description">Short description text</string>
+    <string name="preview_value">Value Text</string>
+    <string name="preview_section_title">Section Title</string>
+    <string name="preview_item_id">Title Text</string>
+</resources>
