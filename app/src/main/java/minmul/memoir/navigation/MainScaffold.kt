@@ -19,6 +19,7 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,11 +52,21 @@ fun MainScaffold(
     onOpenHistory: () -> Unit,
     onResetOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
+    openQueue: Boolean = false,
+    onOpenQueueConsumed: () -> Unit = {},
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Home) }
     var settingsDestination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
     val canNavigateBack = selectedTab == MainTab.Settings &&
         settingsDestination != SettingsDestination.Root
+
+    LaunchedEffect(openQueue) {
+        if (openQueue) {
+            selectedTab = MainTab.Queue
+            settingsDestination = SettingsDestination.Root
+            onOpenQueueConsumed()
+        }
+    }
     val titleRes = when (selectedTab) {
         MainTab.Home -> selectedTab.labelRes
         MainTab.Queue -> selectedTab.labelRes

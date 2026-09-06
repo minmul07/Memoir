@@ -9,6 +9,7 @@
     <string name="action_disagree">비동의</string>
     <string name="action_delete">삭제</string>
     <string name="action_more">더보기</string>
+    <string name="action_cancel">취소</string>
     <string name="action_cancel_analysis">분석 취소</string>
     <string name="action_add_to_queue">큐에 추가</string>
 
@@ -34,6 +35,9 @@
     <string name="home_empty">없음</string>
     <string name="archive_item">보관함 항목</string>
     <string name="item_detail_empty_analysis">분석 원문이 없습니다.</string>
+
+    <string name="intake_confirm_title">공유 확인</string>
+    <string name="intake_image_count">이미지 %d장</string>
 
     <string name="queue_current">현재 큐</string>
     <string name="queue_pending_item">대기 항목</string>
