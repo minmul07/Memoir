@@ -23,6 +23,7 @@ abstract class MemoirDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
     abstract fun analysisJobDao(): AnalysisJobDao
     abstract fun analysisResultDao(): AnalysisResultDao
+    abstract fun contentWriteDao(): ContentWriteDao
 
     companion object {
         fun create(context: Context): MemoirDatabase {

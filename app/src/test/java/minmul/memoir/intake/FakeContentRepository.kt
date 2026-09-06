@@ -1,0 +1,47 @@
+package minmul.memoir.intake
+
+import kotlinx.coroutines.CompletableDeferred
+import minmul.memoir.core.model.ItemSource
+import minmul.memoir.data.content.ContentRepository
+import minmul.memoir.data.content.ImportedOriginal
+
+class FakeContentRepository(
+    failUris: Set<String> = emptySet(),
+    holdUris: Set<String> = emptySet(),
+) : ContentRepository {
+    private val failUris = failUris
+    private val holds = holdUris.associateWith { CompletableDeferred<Unit>() }
+    val imported = mutableListOf<Pair<String, String>>()
+    val enqueued = mutableListOf<List<ImportedOriginal>>()
+    val discarded = mutableListOf<List<String>>()
+
+    fun release(uri: String) {
+        holds.getValue(uri).complete(Unit)
+    }
+
+    override suspend fun importOriginal(itemId: String, sourceUri: String): ImportedOriginal {
+        imported += itemId to sourceUri
+        holds[sourceUri]?.await()
+        if (sourceUri in failUris) {
+            error("import failed")
+        }
+        return ImportedOriginal(
+            itemId = itemId,
+            filePath = "items/$itemId/original",
+            mimeType = "image/jpeg",
+        )
+    }
+
+    override suspend fun enqueueImported(items: List<ImportedOriginal>, source: ItemSource) {
+        check(source == ItemSource.Share)
+        enqueued += items
+    }
+
+    override suspend fun discardOriginals(itemIds: List<String>) {
+        discarded += itemIds
+    }
+
+    override fun discardOriginalsAsync(itemIds: List<String>) {
+        discarded += itemIds
+    }
+}

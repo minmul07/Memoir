@@ -43,7 +43,7 @@ configurations.configureEach {
 dependencies {
     api(libs.androidx.datastore.preferences)
     implementation(projects.core.model)
-    implementation(libs.androidx.room3.runtime)
+    api(libs.androidx.room3.runtime)
     implementation(libs.androidx.sqlite.bundled)
     ksp(libs.androidx.room3.compiler)
     testImplementation(libs.junit.jupiter)

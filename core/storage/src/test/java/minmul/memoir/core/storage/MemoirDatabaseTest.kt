@@ -52,6 +52,42 @@ class MemoirDatabaseTest {
         assertEquals("job-1", db.analysisResultDao().getByItemId("item-1")?.jobId)
     }
 
+    @Test
+    fun `max queue order is null when empty and increases with inserts`() = runDatabaseTest { db ->
+        assertNull(db.analysisJobDao().maxQueueOrder())
+
+        db.itemDao().insert(itemEntity("item-1"))
+        db.analysisJobDao().insert(jobEntity(id = "job-1", itemId = "item-1", queueOrder = 3))
+        db.itemDao().insert(itemEntity("item-2"))
+        db.analysisJobDao().insert(jobEntity(id = "job-2", itemId = "item-2", queueOrder = 8))
+
+        assertEquals(8, db.analysisJobDao().maxQueueOrder())
+    }
+
+    @Test
+    fun `item and job batch insert rolls back together`() = runDatabaseTest { db ->
+        val error = runCatching {
+            db.contentWriteDao().insertItemsAndJobs(
+                listOf(
+                    ItemJobWrite(
+                        item = itemEntity("item-1"),
+                        job = jobEntity(id = "job-1", itemId = "item-1"),
+                    ),
+                    ItemJobWrite(
+                        item = itemEntity("item-2"),
+                        job = jobEntity(id = "job-2", itemId = "item-1"),
+                    ),
+                ),
+            )
+        }.exceptionOrNull()
+
+        assertTrue(error is SQLiteException)
+        assertNull(db.itemDao().getById("item-1"))
+        assertNull(db.itemDao().getById("item-2"))
+        assertNull(db.analysisJobDao().getById("job-1"))
+        assertNull(db.analysisJobDao().getById("job-2"))
+    }
+
     private fun runDatabaseTest(testBody: suspend TestScope.(MemoirDatabase) -> Unit) = runTest {
         val db = MemoirDatabase.createInMemory(StandardTestDispatcher(testScheduler))
         try {
@@ -69,12 +105,12 @@ class MemoirDatabaseTest {
         mimeType = "image/jpeg",
     )
 
-    private fun jobEntity(id: String, itemId: String) = AnalysisJobEntity(
+    private fun jobEntity(id: String, itemId: String, queueOrder: Int = 0) = AnalysisJobEntity(
         id = id,
         itemId = itemId,
         status = JobStatus.Queued,
         stage = JobStage.Waiting,
-        queueOrder = 0,
+        queueOrder = queueOrder,
         attemptCount = 0,
         errorMessage = null,
         createdAt = 1L,

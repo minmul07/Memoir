@@ -1,7 +1,6 @@
 package minmul.memoir
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,10 +14,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.feature.intake.IntakeConfirmItem
 import minmul.memoir.feature.intake.IntakeConfirmScreen
 import minmul.memoir.intake.IntakeUiState
 import minmul.memoir.intake.IntakeViewModel
@@ -49,9 +50,8 @@ class IntakeActivity : ComponentActivity() {
     private fun openMain(openQueue: Boolean) {
         startActivity(
             Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 if (openQueue) {
                     putExtra(MainActivity.EXTRA_OPEN_QUEUE, true)
                 }
@@ -75,16 +75,22 @@ private fun IntakeRoute(
             IntakeUiState.OpenOnboarding -> onOpenOnboarding()
             IntakeUiState.OpenQueue -> onOpenQueue()
             IntakeUiState.Finish -> onFinish()
-            IntakeUiState.Loading,
-            is IntakeUiState.Confirm -> Unit
+            IntakeUiState.Loading, is IntakeUiState.Confirm -> Unit
         }
     }
     when (val state = uiState) {
         is IntakeUiState.Confirm -> IntakeConfirmScreen(
-            imageUris = state.imageUris.map(Uri::parse),
+            items = state.drafts.map { draft ->
+                IntakeConfirmItem(
+                    imageUri = draft.imageUri.toUri(),
+                    failed = draft.failed,
+                )
+            },
+            isSubmitting = state.isSubmitting,
             onAdd = viewModel::onAdd,
             onCancel = viewModel::onCancel,
         )
+
         else -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,

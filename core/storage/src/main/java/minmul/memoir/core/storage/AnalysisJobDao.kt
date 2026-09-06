@@ -16,6 +16,9 @@ interface AnalysisJobDao {
     @Query("SELECT * FROM analysis_jobs WHERE item_id = :itemId")
     suspend fun getByItemId(itemId: String): AnalysisJobEntity?
 
+    @Query("SELECT MAX(queue_order) FROM analysis_jobs")
+    suspend fun maxQueueOrder(): Int?
+
     @Query("DELETE FROM analysis_jobs WHERE id = :id")
     suspend fun deleteById(id: String)
 }
