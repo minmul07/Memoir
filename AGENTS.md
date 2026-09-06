@@ -51,3 +51,26 @@
 Android Studio / JetBrains MCP, ADB, mobile-mcp 등 런타임 또는 IDE 기반 도구를 실제로 사용한 경우에는 수행한 조작과 핵심 결과를 간결히 명시한다.
 
 위험하거나 불확실한 부분은 조용히 추측하지 말고 명시적으로 보고한다.
+
+---
+
+## Documentation
+
+After implementing a change, inspect relevant project documentation.
+
+Update documentation in the same change when the implementation changes:
+- externally observable behavior
+- architecture or module responsibilities
+- APIs or data contracts
+- setup, build, or development workflows
+- non-obvious technical constraints
+
+Do not update documentation for implementation-only refactors that do not
+change documented behavior.
+
+Keep documentation changes minimal and scoped to the affected area.
+Do not rewrite unrelated documentation.
+
+Do not modify AGENTS.md automatically.
+If you discover a recurring project rule, constraint, or workflow that should
+be preserved for future agents, suggest an AGENTS.md change to the user.
