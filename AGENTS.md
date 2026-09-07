@@ -74,3 +74,10 @@ Do not rewrite unrelated documentation.
 Do not modify AGENTS.md automatically.
 If you discover a recurring project rule, constraint, or workflow that should
 be preserved for future agents, suggest an AGENTS.md change to the user.
+
+---
+
+## Gradle
+
+에이전트에서 `./gradlew`를 실행할 때 배포본을 다시 받거나 데몬을 새로 띄우면, `GRADLE_USER_HOME`을 호스트 사용자 홈의 `.gradle`(
+`C:\Users\ddddd\.gradle`)로 명시한다. Android Studio/일반 터미널과 같은 캐시·데몬을 쓰고, 시스템 PATH의 `gradle`로 우회하지 않는다.

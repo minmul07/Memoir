@@ -1,7 +1,5 @@
 package minmul.memoir.navigation
 
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
@@ -28,7 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.R
 import minmul.memoir.feature.main.HomeScreen
 import minmul.memoir.feature.queue.WorkQueueScreen
@@ -60,8 +62,8 @@ fun MainScaffold(
     val actions: AnalysisActionsViewModel = hiltViewModel()
     val busy by actions.busy.collectAsStateWithLifecycle()
     val actionFailed by actions.failed.collectAsStateWithLifecycle()
-    val serviceFailed by minmul.memoir.background.analysis.AnalysisService.failed.collectAsStateWithLifecycle()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val serviceFailed by AnalysisService.failed.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Home) }
     var settingsDestination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
     val canNavigateBack = selectedTab == MainTab.Settings &&
@@ -152,7 +154,7 @@ fun MainScaffold(
                     items = state.items,
                     onCancel = actions::cancel,
                     onOpenItem = onOpenItem,
-                    onStart = { minmul.memoir.background.analysis.AnalysisService.start(context) },
+                    onStart = { AnalysisService.start(context) },
                     actionFailed = actionFailed,
                     serviceFailed = serviceFailed,
                     isLoading = state.isLoading,
@@ -174,18 +176,16 @@ fun MainScaffold(
                 SettingsDestination.ModelManagement -> {
                     val model: OcrModelViewModel = hiltViewModel()
                     val modelState by model.state.collectAsStateWithLifecycle()
-                    val statusRes = when (modelState) {
-                        OcrModelState.Checking -> R.string.ocr_model_checking
-                        OcrModelState.Missing -> R.string.ocr_model_missing
-                        OcrModelState.Installing -> R.string.ocr_model_installing
-                        OcrModelState.Ready -> R.string.ocr_model_ready
-                        OcrModelState.Failed -> R.string.ocr_model_failed
-                    }
+                    LaunchedEffect(model) { model.refresh() }
                     ModelManagementScreen(
                         modifier = contentModifier,
-                        ocrStatus = stringResource(statusRes),
-                        ocrBusy = modelState == OcrModelState.Checking || modelState == OcrModelState.Installing,
+                        ocrModels = modelState.models,
+                        preferencesLoaded = modelState.preferencesLoaded,
+                        preferencesFailed = modelState.preferencesFailed,
+                        savingModels = modelState.savingModels,
+                        onOcrEnabledChange = model::setEnabled,
                         onInstallOcr = model::install,
+                        onRefreshOcr = model::refresh,
                     )
                 }
                 SettingsDestination.DeveloperOptions -> DeveloperOptionsScreen(

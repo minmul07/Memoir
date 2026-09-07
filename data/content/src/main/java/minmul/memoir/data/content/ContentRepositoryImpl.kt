@@ -1,10 +1,9 @@
 package minmul.memoir.data.content
 
 import android.content.Context
+import android.util.Log
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,16 +11,18 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import minmul.memoir.core.model.QueueItem
 import minmul.memoir.core.model.ItemSource
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
+import minmul.memoir.core.model.QueueItem
 import minmul.memoir.core.storage.AnalysisJobEntity
 import minmul.memoir.core.storage.ItemEntity
 import minmul.memoir.core.storage.ItemJobWrite
 import minmul.memoir.core.storage.MemoirDatabase
 import minmul.memoir.core.storage.OriginalFileStore
-import androidx.core.net.toUri
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class ContentRepositoryImpl @Inject constructor(
@@ -115,7 +116,7 @@ class ContentRepositoryImpl @Inject constructor(
             } catch (_: Exception) {
                 // Intake cancellation cleanup must not crash the application.
                 // Explicit item deletion uses the suspending API and reports failure to the UI.
-                android.util.Log.w("Memoir", "Could not discard temporary originals")
+                Log.w("Memoir", "Could not discard temporary originals")
             }
         }
     }

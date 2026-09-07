@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
+import minmul.memoir.core.design.analysisStatusText
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.JobStatus
 import minmul.memoir.core.model.QueueItem
@@ -38,13 +39,17 @@ fun WorkQueueScreen(
     serviceFailed: Boolean = false,
 ) {
     val preview = LocalInspectionMode.current
-    Column(modifier = modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(horizontal = 16.dp)) {
         Text(
             text = if (preview) "…" else stringResource(R.string.queue_item_count, items.size),
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(vertical = 16.dp),
         )
-        LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        LazyColumn(modifier = Modifier
+            .weight(1f)
+            .fillMaxWidth()) {
             when {
                 isLoading -> item { CircularProgressIndicator() }
                 failed -> item { Text(if (preview) "…" else stringResource(R.string.queue_load_failed)) }
@@ -62,7 +67,7 @@ fun WorkQueueScreen(
                         Text(if (preview) "…" else stringResource(R.string.queue_image_number, index + 1))
                     },
                     supportingContent = {
-                        Text(minmul.memoir.core.design.analysisStatusText(item.status, item.stage, item.attemptCount))
+                        Text(analysisStatusText(item.status, item.stage, item.attemptCount))
                     },
                     leadingContent = {
                         ImageThumbnail(imagePath = item.imagePath, modifier = Modifier.size(64.dp))

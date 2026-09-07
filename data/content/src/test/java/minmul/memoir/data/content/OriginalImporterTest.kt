@@ -1,13 +1,15 @@
 package minmul.memoir.data.content
 
-import java.io.File
-import java.io.IOException
 import minmul.memoir.core.storage.OriginalFileStore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 class OriginalImporterTest {
     @TempDir
@@ -88,7 +90,7 @@ class OriginalImporterTest {
     private class RecordingEncoder : ImageJpegEncoder {
         var called: Boolean = false
 
-        override fun encode(input: java.io.InputStream, output: java.io.OutputStream) {
+        override fun encode(input: InputStream, output: OutputStream) {
             called = true
         }
     }

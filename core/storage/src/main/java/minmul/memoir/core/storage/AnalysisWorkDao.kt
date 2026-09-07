@@ -1,7 +1,12 @@
 package minmul.memoir.core.storage
 
-import androidx.room3.*
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Transaction
 import kotlinx.coroutines.flow.Flow
+import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
 
 @Dao
@@ -43,11 +48,12 @@ abstract class AnalysisWorkDao {
         if (claim(next.id, now) != 1) return null
         val item = item(next.itemId) ?: return null
         return QueueEntry(next.id, next.itemId, item.filePath, JobStatus.Running,
-            minmul.memoir.core.model.JobStage.Ocr, next.attemptCount, next.errorMessage)
+            JobStage.Ocr, next.attemptCount, next.errorMessage
+        )
     }
 
     @Query("UPDATE analysis_jobs SET stage = :stage WHERE id = :id AND status = 'running'")
-    abstract suspend fun setStage(id: String, stage: minmul.memoir.core.model.JobStage)
+    abstract suspend fun setStage(id: String, stage: JobStage)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     protected abstract suspend fun insertResult(result: AnalysisResultEntity)

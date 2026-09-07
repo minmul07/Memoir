@@ -1,7 +1,7 @@
 package minmul.memoir.core.storage
 
-import app.cash.turbine.test
 import androidx.sqlite.SQLiteException
+import app.cash.turbine.test
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class MemoirDatabaseTest {
     @Test
@@ -260,7 +261,7 @@ class MemoirDatabaseTest {
             ItemJobWrite(itemEntity("a"), jobEntity("a", "a")),
             ItemJobWrite(itemEntity("b"), jobEntity("b", "b")),
         ))
-        val selected = java.util.concurrent.ConcurrentLinkedQueue<String>()
+        val selected = ConcurrentLinkedQueue<String>()
         coroutineScope {
             repeat(4) {
                 launch(Dispatchers.Default) { db.analysisWorkDao().claimNext(2)?.let { selected.add(it.jobId) } }
