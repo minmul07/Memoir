@@ -1,0 +1,5 @@
+<resources>
+    <string name="analysis_channel">이미지 분석</string>
+    <string name="analysis_notification">Memoir 이미지 분석 중</string>
+    <string name="analysis_notification_progress">큐의 이미지를 순서대로 처리하고 있습니다</string>
+</resources>

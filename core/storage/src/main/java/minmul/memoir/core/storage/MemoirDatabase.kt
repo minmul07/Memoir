@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 )
 @ColumnTypeConverters(MemoirColumnConverters::class)
 abstract class MemoirDatabase : RoomDatabase() {
+    abstract fun analysisWorkDao(): AnalysisWorkDao
     abstract fun itemDao(): ItemDao
     abstract fun analysisJobDao(): AnalysisJobDao
     abstract fun analysisResultDao(): AnalysisResultDao

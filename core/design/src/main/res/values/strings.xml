@@ -85,4 +85,26 @@
     <string name="queue_image_number">이미지 %1$d</string>
     <string name="queue_waiting">분석 대기 중</string>
     <string name="queue_running">분석 중</string>
+    <string name="analysis_retrying">실패 - 재시도 중</string>
+    <string name="analysis_ocr">텍스트 읽는 중</string>
+    <string name="analysis_saving">DB 저장 중</string>
+    <string name="analysis_restart">분석 시작 / 재개</string>
+    <string name="analysis_service_failed">분석이 중단되었습니다. 다시 시작해 주세요.</string>
+    <string name="content_action_failed">작업을 완료하지 못했습니다. 다시 시도해 주세요.</string>
+    <string name="item_missing">항목이 없거나 삭제되었습니다.</string>
+    <string name="ocr_empty">인식된 텍스트가 없습니다.</string>
+    <string name="history_empty">분석 기록이 없습니다.</string>
+    <string name="item_delete_confirmation">원본 이미지와 분석 작업, 결과를 삭제합니다.</string>
+    <string name="developer_delete_queue">모든 활성 큐 삭제</string>
+    <string name="developer_delete_items">저장된 모든 아이템 삭제</string>
+    <string name="queue_delete_confirmation">대기·분석 중인 작업을 삭제합니다. 원본 아이템과 완료 기록은 남습니다.</string>
+    <string name="all_items_delete_confirmation">저장된 모든 원본 이미지, 큐, 분석 기록과 결과를 삭제합니다.</string>
+    <string name="ocr_model_checking">한국어 OCR 모델 확인 중</string>
+    <string name="ocr_model_missing">한국어 OCR 모델 다운로드 필요</string>
+    <string name="ocr_model_installing">한국어 OCR 모델 다운로드 중</string>
+    <string name="ocr_model_ready">한국어 OCR 모델 사용 가능</string>
+    <string name="ocr_model_failed">한국어 OCR 모델 확인·다운로드 실패</string>
+    <string name="ocr_model_download">모델 확인 / 다운로드</string>
+    <string name="archive_empty">저장된 아이템이 없습니다.</string>
+    <string name="analysis_unqueued">분석 작업 없음</string>
 </resources>

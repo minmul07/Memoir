@@ -31,6 +31,11 @@ fun WorkQueueScreen(
     failed: Boolean,
     onOpenHistory: () -> Unit,
     modifier: Modifier = Modifier,
+    onCancel: (String) -> Unit = {},
+    onOpenItem: (String) -> Unit = {},
+    onStart: () -> Unit = {},
+    actionFailed: Boolean = false,
+    serviceFailed: Boolean = false,
 ) {
     val preview = LocalInspectionMode.current
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -47,20 +52,28 @@ fun WorkQueueScreen(
             }
             itemsIndexed(items, key = { _, item -> item.jobId }) { index, item ->
                 ListItem(
+                    onClick = { onOpenItem(item.itemId) },
+                    trailingContent = {
+                        TextButton(onClick = { onCancel(item.jobId) }) {
+                            Text(if (preview) "…" else stringResource(R.string.action_cancel))
+                        }
+                    },
                     content = {
                         Text(if (preview) "…" else stringResource(R.string.queue_image_number, index + 1))
                     },
                     supportingContent = {
-                        Text(if (preview) "…" else stringResource(
-                            if (item.status == JobStatus.Running) R.string.queue_running
-                            else R.string.queue_waiting,
-                        ))
+                        Text(minmul.memoir.core.design.analysisStatusText(item.status, item.stage, item.attemptCount))
                     },
                     leadingContent = {
                         ImageThumbnail(imagePath = item.imagePath, modifier = Modifier.size(64.dp))
                     },
                 )
             }
+        }
+        if (actionFailed) Text(stringResource(R.string.content_action_failed))
+        if (serviceFailed) Text(stringResource(R.string.analysis_service_failed))
+        if (items.isNotEmpty()) TextButton(onClick = onStart) {
+            Text(if (preview) "…" else stringResource(R.string.analysis_restart))
         }
         TextButton(onClick = onOpenHistory, modifier = Modifier.fillMaxWidth()) {
             Text(if (preview) "…" else stringResource(R.string.nav_analysis_history))

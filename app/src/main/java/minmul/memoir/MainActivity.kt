@@ -1,5 +1,11 @@
 package minmul.memoir
 
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,10 +20,27 @@ import minmul.memoir.navigation.RootNavDisplay
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @javax.inject.Inject lateinit var contentRepository: minmul.memoir.data.content.ContentRepository
+    private var notificationRequested = false
+    private val notificationPermission = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { }
+
     private val openQueueRequest = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        notificationRequested = savedInstanceState?.getBoolean("notificationRequested") ?: false
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.RESUMED) {
+                contentRepository.observeQueue().map { it.isNotEmpty() }.distinctUntilChanged().catch { emit(false) }.collect { hasWork ->
+                    if (hasWork) {
+                        requestAnalysisNotifications()
+                        minmul.memoir.background.analysis.AnalysisService.start(this@MainActivity)
+                    }
+                }
+            }
+        }
         enableEdgeToEdge()
         applyOpenQueueExtra(intent)
         setContent {
@@ -29,6 +52,21 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun requestAnalysisNotifications() {
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !notificationRequested &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationRequested = true
+            notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("notificationRequested", notificationRequested)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onNewIntent(intent: Intent) {

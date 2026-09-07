@@ -9,10 +9,10 @@ import androidx.room3.Query
 @Dao
 interface AnalysisJobDao {
     @Query("""
-        SELECT j.id AS jobId, j.item_id AS itemId, i.file_path AS filePath, j.status
+        SELECT j.id AS jobId, j.item_id AS itemId, i.file_path AS filePath, j.status, j.stage, j.attempt_count AS attemptCount, j.error_message AS errorMessage
         FROM analysis_jobs j INNER JOIN items i ON i.id = j.item_id
         WHERE j.status IN ('queued', 'running')
-        ORDER BY j.queue_order ASC, j.created_at ASC, j.id ASC
+        ORDER BY j.attempt_count, j.queue_order ASC, j.created_at ASC, j.id ASC
     """)
     fun observeQueue(): Flow<List<QueueEntry>>
 

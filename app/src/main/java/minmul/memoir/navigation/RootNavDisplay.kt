@@ -139,34 +139,55 @@ private fun RootNavDisplay(
                 )
             }
             entry<Archive> {
+                val archive: ArchiveViewModel = hiltViewModel()
+                val archiveState by archive.uiState.collectAsStateWithLifecycle()
                 StackScaffold(
                     titleRes = R.string.nav_archive,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     ArchiveScreen(
+                        items = archiveState.items,
+                        loading = archiveState.loading,
+                        failed = archiveState.failed,
                         onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                         modifier = contentModifier,
                     )
                 }
             }
             entry<AnalysisHistory> {
+                val history: AnalysisHistoryViewModel = hiltViewModel()
+                val historyState by history.uiState.collectAsStateWithLifecycle()
                 StackScaffold(
                     titleRes = R.string.nav_analysis_history,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     AnalysisHistoryScreen(
+                        items = historyState.items,
+                        loading = historyState.isLoading,
+                        failed = historyState.failed,
                         onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                         modifier = contentModifier,
                     )
                 }
             }
             entry<ItemDetail> { key ->
+                val detail: ItemDetailViewModel = hiltViewModel()
+                val actions: AnalysisActionsViewModel = hiltViewModel()
+                val detailState by detail.uiState.collectAsStateWithLifecycle()
+                val busy by actions.busy.collectAsStateWithLifecycle()
+                val actionFailed by actions.failed.collectAsStateWithLifecycle()
+                LaunchedEffect(key.itemId) { detail.load(key.itemId) }
                 StackScaffold(
                     titleRes = R.string.nav_item_detail,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     ItemDetailScreen(
                         itemId = key.itemId,
+                        item = detailState.item,
+                        loading = detailState.loading,
+                        failed = detailState.failed || actionFailed,
+                        busy = busy,
+                        onDelete = { actions.deleteItem(key.itemId) { backStack.removeLastOrNull() } },
                         modifier = contentModifier,
                     )
                 }

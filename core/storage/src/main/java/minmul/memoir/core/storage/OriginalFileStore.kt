@@ -34,7 +34,7 @@ class OriginalFileStore(private val filesDir: File) {
     }
 
     fun deleteItemDir(itemId: String) {
-        itemDir(itemId).deleteRecursively()
+        check(itemDir(itemId).deleteRecursively()) { "cannot delete item files" }
     }
 
     private fun itemDir(itemId: String): File = File(filesDir, "items/$itemId")

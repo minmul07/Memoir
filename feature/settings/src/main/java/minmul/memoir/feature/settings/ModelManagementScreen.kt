@@ -15,6 +15,9 @@ import minmul.memoir.core.design.theme.MemoirTheme
 @Composable
 fun ModelManagementScreen(
     modifier: Modifier = Modifier,
+    ocrStatus: String = "",
+    ocrBusy: Boolean = false,
+    onInstallOcr: () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         ItemSection(title = stringResource(R.string.model_section_multimodal)) {
@@ -30,11 +33,15 @@ fun ModelManagementScreen(
             )
         }
         ItemSection(title = stringResource(R.string.model_section_ocr)) {
-            CheckboxItem(
-                title = stringResource(R.string.model_mlkit_text_recognition_v2),
-                checked = true,
-                onCheckedChange = {},
+            androidx.compose.material3.Text(
+                if (androidx.compose.ui.platform.LocalInspectionMode.current) "…" else ocrStatus,
             )
+            androidx.compose.material3.TextButton(onClick = onInstallOcr, enabled = !ocrBusy) {
+                androidx.compose.material3.Text(
+                    if (androidx.compose.ui.platform.LocalInspectionMode.current) "…"
+                    else stringResource(R.string.ocr_model_download),
+                )
+            }
         }
         ItemSection(title = stringResource(R.string.model_section_embedding)) {
             NavigationItem(

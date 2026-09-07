@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.model)
     implementation(libs.kotlinx.coroutines.android)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)

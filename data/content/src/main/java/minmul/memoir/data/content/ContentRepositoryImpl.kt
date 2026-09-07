@@ -5,6 +5,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -50,6 +51,9 @@ class ContentRepositoryImpl @Inject constructor(
                 itemId = entry.itemId,
                 imagePath = entry.filePath,
                 status = entry.status,
+                stage = entry.stage,
+                attemptCount = entry.attemptCount,
+                errorMessage = entry.errorMessage,
             )
         }
     }
@@ -104,7 +108,15 @@ class ContentRepositoryImpl @Inject constructor(
             return
         }
         backgroundScope.launch {
-            discardOriginals(itemIds)
+            try {
+                discardOriginals(itemIds)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // Intake cancellation cleanup must not crash the application.
+                // Explicit item deletion uses the suspending API and reports failure to the UI.
+                android.util.Log.w("Memoir", "Could not discard temporary originals")
+            }
         }
     }
 }

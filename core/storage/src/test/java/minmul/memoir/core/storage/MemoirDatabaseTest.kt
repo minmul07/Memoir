@@ -180,6 +180,95 @@ class MemoirDatabaseTest {
         assertNull(db.analysisJobDao().getById("job-2"))
     }
 
+    @Test
+    fun `failed job retries behind fresh work and second failure is terminal`() = runDatabaseTest { db ->
+        db.contentWriteDao().insertItemsAndJobs(listOf(
+            ItemJobWrite(itemEntity("a"), jobEntity("a", "a")),
+            ItemJobWrite(itemEntity("b"), jobEntity("b", "b")),
+        ))
+        val dao = db.analysisWorkDao()
+        assertEquals("a", dao.claimNext(2)?.jobId)
+        dao.fail("a", "fake", 3)
+        assertEquals("b", dao.claimNext(4)?.jobId)
+        dao.complete("b", "한국어", "{}", 5)
+        assertEquals("a", dao.claimNext(6)?.jobId)
+        dao.fail("a", "fake", 7)
+        assertNull(dao.claimNext(8))
+        assertEquals(JobStatus.Failed, dao.job("a")?.status)
+        assertEquals(1, dao.job("a")?.attemptCount)
+        assertNull(db.analysisResultDao().getByItemId("a"))
+        assertEquals("한국어", db.analysisResultDao().getByItemId("b")?.ocrText)
+    }
+
+    @Test
+    fun `completion cannot resurrect cancelled or deleted jobs`() = runDatabaseTest { db ->
+        for (id in listOf("cancelled", "deleted", "queue")) {
+            db.contentWriteDao().insertItemsAndJobs(listOf(ItemJobWrite(itemEntity(id), jobEntity(id, id))))
+            db.analysisWorkDao().claimNext(2)
+            when (id) {
+                "cancelled" -> db.analysisWorkDao().cancel(id, 3)
+                "deleted" -> db.itemDao().deleteById(id)
+                else -> db.analysisWorkDao().deleteQueue()
+            }
+            db.analysisWorkDao().complete(id, "text", "{}", 4)
+            assertNull(db.analysisResultDao().getByItemId(id))
+        }
+        assertEquals(JobStatus.Cancelled, db.analysisWorkDao().job("cancelled")?.status)
+        assertNull(db.itemDao().getById("deleted"))
+        assertNotNull(db.itemDao().getById("queue"))
+    }
+
+    @Test
+    fun `successful completion exposes detail and history together`() = runDatabaseTest { db ->
+        db.contentWriteDao().insertItemsAndJobs(listOf(ItemJobWrite(itemEntity("a"), jobEntity("a", "a"))))
+        val dao = db.analysisWorkDao()
+        dao.claimNext(2)
+        dao.complete("a", "한국어", "{\"fake\":true}", 3)
+        dao.observeDetail("a").test {
+            val detail = awaitItem()
+            assertEquals(JobStatus.Succeeded, detail?.status)
+            assertEquals("한국어", detail?.ocrText)
+            assertEquals("{\"fake\":true}", detail?.payloadJson)
+            cancelAndIgnoreRemainingEvents()
+        }
+        dao.observeHistory().test {
+            assertEquals(listOf("a"), awaitItem().map { it.itemId })
+            cancelAndIgnoreRemainingEvents()
+        }
+        db.itemDao().deleteById("a")
+        assertNull(dao.job("a"))
+        assertNull(db.analysisResultDao().getByItemId("a"))
+    }
+
+    @Test
+    fun `recovery fails interrupted jobs without retrying them`() = runDatabaseTest { db ->
+        db.contentWriteDao().insertItemsAndJobs(listOf(
+            ItemJobWrite(itemEntity("a"), jobEntity("a", "a")),
+            ItemJobWrite(itemEntity("b"), jobEntity("b", "b")),
+        ))
+        val dao = db.analysisWorkDao()
+        dao.claimNext(2)
+        dao.recoverInterrupted(3)
+        assertEquals(JobStatus.Failed, dao.job("a")?.status)
+        assertEquals("interrupted", dao.job("a")?.errorMessage)
+        assertEquals("b", dao.claimNext(4)?.jobId)
+    }
+
+    @Test
+    fun `concurrent claims select different jobs`() = runDatabaseTest { db ->
+        db.contentWriteDao().insertItemsAndJobs(listOf(
+            ItemJobWrite(itemEntity("a"), jobEntity("a", "a")),
+            ItemJobWrite(itemEntity("b"), jobEntity("b", "b")),
+        ))
+        val selected = java.util.concurrent.ConcurrentLinkedQueue<String>()
+        coroutineScope {
+            repeat(4) {
+                launch(Dispatchers.Default) { db.analysisWorkDao().claimNext(2)?.let { selected.add(it.jobId) } }
+            }
+        }
+        assertEquals(setOf("a", "b"), selected.toSet())
+        assertEquals(2, selected.size)
+    }
     private fun runDatabaseTest(testBody: suspend TestScope.(MemoirDatabase) -> Unit) = runTest {
         val db = MemoirDatabase.createInMemory(StandardTestDispatcher(testScheduler))
         try {

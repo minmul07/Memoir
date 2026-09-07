@@ -7,4 +7,7 @@ data class QueueEntry(
     val itemId: String,
     val filePath: String,
     val status: JobStatus,
+    val stage: minmul.memoir.core.model.JobStage = minmul.memoir.core.model.JobStage.Waiting,
+    val attemptCount: Int = 0,
+    val errorMessage: String? = null,
 )
