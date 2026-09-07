@@ -8,12 +8,15 @@ import minmul.memoir.data.content.ImportedOriginal
 class FakeContentRepository(
     failUris: Set<String> = emptySet(),
     holdUris: Set<String> = emptySet(),
+    private var enqueueFailuresRemaining: Int = 0,
 ) : ContentRepository {
     private val failUris = failUris
     private val holds = holdUris.associateWith { CompletableDeferred<Unit>() }
     val imported = mutableListOf<Pair<String, String>>()
     val enqueued = mutableListOf<List<ImportedOriginal>>()
     val discarded = mutableListOf<List<String>>()
+    var enqueueAttempts = 0
+        private set
 
     fun release(uri: String) {
         holds.getValue(uri).complete(Unit)
@@ -34,6 +37,11 @@ class FakeContentRepository(
 
     override suspend fun enqueueImported(items: List<ImportedOriginal>, source: ItemSource) {
         check(source == ItemSource.Share)
+        enqueueAttempts++
+        if (enqueueFailuresRemaining > 0) {
+            enqueueFailuresRemaining--
+            error("enqueue failed")
+        }
         enqueued += items
     }
 

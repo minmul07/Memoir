@@ -1,6 +1,10 @@
 package minmul.memoir.core.storage
 
 import androidx.sqlite.SQLiteException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -62,6 +66,61 @@ class MemoirDatabaseTest {
         db.analysisJobDao().insert(jobEntity(id = "job-2", itemId = "item-2", queueOrder = 8))
 
         assertEquals(8, db.analysisJobDao().maxQueueOrder())
+    }
+
+    @Test
+    fun `item and job insert assigns queue orders after current max`() = runDatabaseTest { db ->
+        db.itemDao().insert(itemEntity("existing"))
+        db.analysisJobDao().insert(jobEntity(id = "job-existing", itemId = "existing", queueOrder = 4))
+
+        db.contentWriteDao().insertItemsAndJobs(
+            listOf(
+                ItemJobWrite(
+                    item = itemEntity("item-1"),
+                    job = jobEntity(id = "job-1", itemId = "item-1", queueOrder = 99),
+                ),
+                ItemJobWrite(
+                    item = itemEntity("item-2"),
+                    job = jobEntity(id = "job-2", itemId = "item-2", queueOrder = 99),
+                ),
+            ),
+        )
+
+        assertEquals(5, db.analysisJobDao().getById("job-1")?.queueOrder)
+        assertEquals(6, db.analysisJobDao().getById("job-2")?.queueOrder)
+    }
+
+    @Test
+    fun `concurrent item and job inserts get distinct sequential queue orders`() = runTest {
+        val db = MemoirDatabase.createInMemory(Dispatchers.IO)
+        try {
+            val count = 20
+            val start = CompletableDeferred<Unit>()
+            coroutineScope {
+                repeat(count) { index ->
+                    launch(Dispatchers.IO) {
+                        start.await()
+                        db.contentWriteDao().insertItemsAndJobs(
+                            listOf(
+                                ItemJobWrite(
+                                    item = itemEntity("item-$index"),
+                                    job = jobEntity(id = "job-$index", itemId = "item-$index"),
+                                ),
+                            ),
+                        )
+                    }
+                }
+                start.complete(Unit)
+            }
+
+            val orders = (0 until count).map { index ->
+                requireNotNull(db.analysisJobDao().getById("job-$index")).queueOrder
+            }
+            assertEquals(count, orders.toSet().size)
+            assertEquals((0 until count).toList(), orders.sorted())
+        } finally {
+            db.close()
+        }
     }
 
     @Test

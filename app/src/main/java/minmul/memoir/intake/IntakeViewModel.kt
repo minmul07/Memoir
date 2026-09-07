@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +29,7 @@ import minmul.memoir.data.content.ContentRepository
 import minmul.memoir.data.content.ImportedOriginal
 import minmul.memoir.data.preferences.OnboardingProgress
 import minmul.memoir.data.preferences.OnboardingProgressStore
+import kotlin.time.Duration.Companion.milliseconds
 
 data class IntakeDraft(
     val imageUri: String,
@@ -128,9 +130,21 @@ class IntakeViewModel @Inject constructor(
                 if (ready.isEmpty()) {
                     return@launch
                 }
-                contentRepository.enqueueImported(ready, ItemSource.Share)
-                committed = true
-                userAction.value = UserAction.Add
+                repeat(2) { attempt ->
+                    try {
+                        contentRepository.enqueueImported(ready, ItemSource.Share)
+                        committed = true
+                        userAction.value = UserAction.Add
+                        return@launch
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Throwable) {
+                        if (attempt > 0) {
+                            return@launch
+                        }
+                        delay(ENQUEUE_RETRY_DELAY_MS.milliseconds)
+                    }
+                }
             } finally {
                 if (userAction.value != UserAction.Add) {
                     isSubmitting.value = false
@@ -221,5 +235,9 @@ class IntakeViewModel @Inject constructor(
         val failed: Boolean = false,
     ) {
         fun toDraft(): IntakeDraft = IntakeDraft(imageUri = imageUri, failed = failed)
+    }
+
+    private companion object {
+        const val ENQUEUE_RETRY_DELAY_MS = 100L
     }
 }

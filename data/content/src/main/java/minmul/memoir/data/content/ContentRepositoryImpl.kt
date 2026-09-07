@@ -1,7 +1,6 @@
 package minmul.memoir.data.content
 
 import android.content.Context
-import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
@@ -52,8 +51,7 @@ class ContentRepositoryImpl @Inject constructor(
             return
         }
         val now = System.currentTimeMillis()
-        val base = database.analysisJobDao().maxQueueOrder() ?: -1
-        val writes = items.mapIndexed { index, imported ->
+        val writes = items.map { imported ->
             ItemJobWrite(
                 item = ItemEntity(
                     id = imported.itemId,
@@ -67,7 +65,7 @@ class ContentRepositoryImpl @Inject constructor(
                     itemId = imported.itemId,
                     status = JobStatus.Queued,
                     stage = JobStage.Waiting,
-                    queueOrder = base + 1 + index,
+                    queueOrder = 0,
                     attemptCount = 0,
                     errorMessage = null,
                     createdAt = now,
