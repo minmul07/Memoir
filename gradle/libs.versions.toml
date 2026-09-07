@@ -23,14 +23,18 @@ kotlinxSerialization = "1.11.0"
 playAiDelivery = "0.2.0-beta01"
 mlkitTextRecognition = "19.0.1"
 playServicesBase = "18.10.1"
+room3 = "3.0.2"
+sqlite = "2.7.0"
 
 [libraries]
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -57,6 +61,14 @@ kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 play-ai-delivery = { group = "com.google.android.play", name = "ai-delivery", version.ref = "playAiDelivery" }
 play-services-mlkit-text-recognition = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "mlkitTextRecognition" }
 play-services-base = { group = "com.google.android.gms", name = "play-services-base", version.ref = "playServicesBase" }
+androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3" }
+androidx-room3-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room3" }
+androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+
+play-services-mlkit-text-recognition-korean = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-korean", version = "16.0.1" }
+play-services-mlkit-text-recognition-japanese = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-japanese", version = "16.0.1" }
+play-services-mlkit-text-recognition-chinese = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-chinese", version = "16.0.1" }
+play-services-mlkit-text-recognition-devanagari = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-devanagari", version = "16.0.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -66,4 +78,4 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
-
+androidx-room3 = { id = "androidx.room3", version.ref = "room3" }

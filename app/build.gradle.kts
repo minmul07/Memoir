@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.hilt.android)
     implementation(projects.background.analysis)
+    implementation(projects.core.model)
     implementation(projects.core.ai)
     implementation(projects.core.design)
     implementation(projects.core.storage)

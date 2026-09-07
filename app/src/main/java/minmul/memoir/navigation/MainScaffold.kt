@@ -19,13 +19,18 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.R
 import minmul.memoir.feature.main.HomeScreen
 import minmul.memoir.feature.queue.WorkQueueScreen
@@ -51,11 +56,26 @@ fun MainScaffold(
     onOpenHistory: () -> Unit,
     onResetOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
+    openQueue: Boolean = false,
+    onOpenQueueConsumed: () -> Unit = {},
 ) {
+    val actions: AnalysisActionsViewModel = hiltViewModel()
+    val busy by actions.busy.collectAsStateWithLifecycle()
+    val actionFailed by actions.failed.collectAsStateWithLifecycle()
+    val serviceFailed by AnalysisService.failed.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Home) }
     var settingsDestination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
     val canNavigateBack = selectedTab == MainTab.Settings &&
         settingsDestination != SettingsDestination.Root
+
+    LaunchedEffect(openQueue) {
+        if (openQueue) {
+            selectedTab = MainTab.Queue
+            settingsDestination = SettingsDestination.Root
+            onOpenQueueConsumed()
+        }
+    }
     val titleRes = when (selectedTab) {
         MainTab.Home -> selectedTab.labelRes
         MainTab.Queue -> selectedTab.labelRes
@@ -127,10 +147,22 @@ fun MainScaffold(
                 onOpenItem = onOpenItem,
                 modifier = contentModifier,
             )
-            MainTab.Queue -> WorkQueueScreen(
-                onOpenHistory = onOpenHistory,
-                modifier = contentModifier,
-            )
+            MainTab.Queue -> {
+                val viewModel: WorkQueueViewModel = hiltViewModel()
+                val state by viewModel.uiState.collectAsStateWithLifecycle()
+                WorkQueueScreen(
+                    items = state.items,
+                    onCancel = actions::cancel,
+                    onOpenItem = onOpenItem,
+                    onStart = { AnalysisService.start(context) },
+                    actionFailed = actionFailed,
+                    serviceFailed = serviceFailed,
+                    isLoading = state.isLoading,
+                    failed = state.failed,
+                    onOpenHistory = onOpenHistory,
+                    modifier = contentModifier,
+                )
+            }
             MainTab.Settings -> when (settingsDestination) {
                 SettingsDestination.Root -> SettingsScreen(
                     onOpenModelManagement = {
@@ -141,11 +173,27 @@ fun MainScaffold(
                     },
                     modifier = contentModifier,
                 )
-                SettingsDestination.ModelManagement -> ModelManagementScreen(
-                    modifier = contentModifier,
-                )
+                SettingsDestination.ModelManagement -> {
+                    val model: OcrModelViewModel = hiltViewModel()
+                    val modelState by model.state.collectAsStateWithLifecycle()
+                    LaunchedEffect(model) { model.refresh() }
+                    ModelManagementScreen(
+                        modifier = contentModifier,
+                        ocrModels = modelState.models,
+                        preferencesLoaded = modelState.preferencesLoaded,
+                        preferencesFailed = modelState.preferencesFailed,
+                        savingModels = modelState.savingModels,
+                        onOcrEnabledChange = model::setEnabled,
+                        onInstallOcr = model::install,
+                        onRefreshOcr = model::refresh,
+                    )
+                }
                 SettingsDestination.DeveloperOptions -> DeveloperOptionsScreen(
                     onResetOnboarding = onResetOnboarding,
+                    onDeleteQueue = actions::deleteQueue,
+                    onDeleteAllItems = actions::deleteAllItems,
+                    busy = busy,
+                    failed = actionFailed,
                     modifier = contentModifier,
                 )
             }

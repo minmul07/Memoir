@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,6 +42,8 @@ import minmul.memoir.feature.queue.AnalysisHistoryScreen
 @Composable
 fun RootNavDisplay(
     modifier: Modifier = Modifier,
+    openQueue: Boolean = false,
+    onOpenQueueConsumed: () -> Unit = {},
     viewModel: RootViewModel = hiltViewModel(),
 ) {
     val onboardingProgress by viewModel.onboardingProgress.collectAsStateWithLifecycle()
@@ -58,6 +61,8 @@ fun RootNavDisplay(
     RootNavDisplay(
         startKey = if (OnboardingProgress.isComplete(progress)) Main else Onboarding,
         onboardingProgress = progress,
+        openQueue = openQueue,
+        onOpenQueueConsumed = onOpenQueueConsumed,
         onAdvanceOnboarding = viewModel::setOnboardingProgress,
         onCompleteOnboarding = viewModel::completeOnboarding,
         onResetOnboarding = viewModel::resetOnboarding,
@@ -69,6 +74,8 @@ fun RootNavDisplay(
 private fun RootNavDisplay(
     startKey: NavKey,
     onboardingProgress: Int,
+    openQueue: Boolean,
+    onOpenQueueConsumed: () -> Unit,
     onAdvanceOnboarding: suspend (Int) -> Unit,
     onCompleteOnboarding: suspend () -> Unit,
     onResetOnboarding: suspend () -> Unit,
@@ -76,6 +83,18 @@ private fun RootNavDisplay(
 ) {
     val backStack = rememberNavBackStack(startKey)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(openQueue) {
+        if (!openQueue) {
+            return@LaunchedEffect
+        }
+        val mainIndex = backStack.indexOfFirst { it is Main }
+        if (mainIndex >= 0) {
+            while (backStack.size > mainIndex + 1) {
+                backStack.removeLastOrNull()
+            }
+        }
+    }
 
     NavDisplay(
         backStack = backStack,
@@ -109,6 +128,8 @@ private fun RootNavDisplay(
                     onOpenArchive = { backStack.add(Archive) },
                     onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                     onOpenHistory = { backStack.add(AnalysisHistory) },
+                    openQueue = openQueue,
+                    onOpenQueueConsumed = onOpenQueueConsumed,
                     onResetOnboarding = {
                         scope.launch {
                             onResetOnboarding()
@@ -118,34 +139,55 @@ private fun RootNavDisplay(
                 )
             }
             entry<Archive> {
+                val archive: ArchiveViewModel = hiltViewModel()
+                val archiveState by archive.uiState.collectAsStateWithLifecycle()
                 StackScaffold(
                     titleRes = R.string.nav_archive,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     ArchiveScreen(
+                        items = archiveState.items,
+                        loading = archiveState.loading,
+                        failed = archiveState.failed,
                         onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                         modifier = contentModifier,
                     )
                 }
             }
             entry<AnalysisHistory> {
+                val history: AnalysisHistoryViewModel = hiltViewModel()
+                val historyState by history.uiState.collectAsStateWithLifecycle()
                 StackScaffold(
                     titleRes = R.string.nav_analysis_history,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     AnalysisHistoryScreen(
+                        items = historyState.items,
+                        loading = historyState.isLoading,
+                        failed = historyState.failed,
                         onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                         modifier = contentModifier,
                     )
                 }
             }
             entry<ItemDetail> { key ->
+                val detail: ItemDetailViewModel = hiltViewModel()
+                val actions: AnalysisActionsViewModel = hiltViewModel()
+                val detailState by detail.uiState.collectAsStateWithLifecycle()
+                val busy by actions.busy.collectAsStateWithLifecycle()
+                val actionFailed by actions.failed.collectAsStateWithLifecycle()
+                LaunchedEffect(key.itemId) { detail.load(key.itemId) }
                 StackScaffold(
                     titleRes = R.string.nav_item_detail,
                     onBack = { backStack.removeLastOrNull() },
                 ) { contentModifier ->
                     ItemDetailScreen(
                         itemId = key.itemId,
+                        item = detailState.item,
+                        loading = detailState.loading,
+                        failed = detailState.failed || actionFailed,
+                        busy = busy,
+                        onDelete = { actions.deleteItem(key.itemId) { backStack.removeLastOrNull() } },
                         modifier = contentModifier,
                     )
                 }

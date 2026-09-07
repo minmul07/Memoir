@@ -51,3 +51,33 @@
 Android Studio / JetBrains MCP, ADB, mobile-mcp 등 런타임 또는 IDE 기반 도구를 실제로 사용한 경우에는 수행한 조작과 핵심 결과를 간결히 명시한다.
 
 위험하거나 불확실한 부분은 조용히 추측하지 말고 명시적으로 보고한다.
+
+---
+
+## Documentation
+
+After implementing a change, inspect relevant project documentation.
+
+Update documentation in the same change when the implementation changes:
+- externally observable behavior
+- architecture or module responsibilities
+- APIs or data contracts
+- setup, build, or development workflows
+- non-obvious technical constraints
+
+Do not update documentation for implementation-only refactors that do not
+change documented behavior.
+
+Keep documentation changes minimal and scoped to the affected area.
+Do not rewrite unrelated documentation.
+
+Do not modify AGENTS.md automatically.
+If you discover a recurring project rule, constraint, or workflow that should
+be preserved for future agents, suggest an AGENTS.md change to the user.
+
+---
+
+## Gradle
+
+에이전트에서 `./gradlew`를 실행할 때 배포본을 다시 받거나 데몬을 새로 띄우면, `GRADLE_USER_HOME`을 호스트 사용자 홈의 `.gradle`(
+`C:\Users\ddddd\.gradle`)로 명시한다. Android Studio/일반 터미널과 같은 캐시·데몬을 쓰고, 시스템 PATH의 `gradle`로 우회하지 않는다.

@@ -24,7 +24,9 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.model)
+    implementation(libs.hilt.android)
+    implementation(libs.kotlinx.coroutines.android)
+    api(projects.core.model)
     implementation(projects.core.storage)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
