@@ -8,8 +8,10 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import minmul.memoir.core.model.QueueItem
 import minmul.memoir.core.model.ItemSource
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
@@ -40,6 +42,17 @@ class ContentRepositoryImpl @Inject constructor(
         jpegEncoder = jpegEncoder,
     )
     private val backgroundScope = CoroutineScope(SupervisorJob() + importDispatcher)
+
+    override fun observeQueue() = database.analysisJobDao().observeQueue().map { entries ->
+        entries.map { entry ->
+            QueueItem(
+                jobId = entry.jobId,
+                itemId = entry.itemId,
+                imagePath = entry.filePath,
+                status = entry.status,
+            )
+        }
+    }
 
     override suspend fun importOriginal(itemId: String, sourceUri: String): ImportedOriginal =
         withContext(importDispatcher) {

@@ -1,5 +1,7 @@
 package minmul.memoir.intake
 
+import kotlinx.coroutines.flow.flowOf
+import minmul.memoir.core.model.QueueItem
 import kotlinx.coroutines.CompletableDeferred
 import minmul.memoir.core.model.ItemSource
 import minmul.memoir.data.content.ContentRepository
@@ -10,6 +12,8 @@ class FakeContentRepository(
     holdUris: Set<String> = emptySet(),
     private var enqueueFailuresRemaining: Int = 0,
 ) : ContentRepository {
+    override fun observeQueue() = flowOf(emptyList<QueueItem>())
+
     private val failUris = failUris
     private val holds = holdUris.associateWith { CompletableDeferred<Unit>() }
     val imported = mutableListOf<Pair<String, String>>()

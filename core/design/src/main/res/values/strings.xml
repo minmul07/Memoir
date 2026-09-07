@@ -78,4 +78,11 @@
     <string name="preview_value">Value Text</string>
     <string name="preview_section_title">Section Title</string>
     <string name="preview_item_id">Title Text</string>
+    <string name="image_preview_failed">미리보기를 불러올 수 없습니다</string>
+    <string name="queue_item_count">작업 대기열 · %1$d개</string>
+    <string name="queue_empty">대기 중인 이미지가 없습니다</string>
+    <string name="queue_load_failed">작업 대기열을 불러올 수 없습니다</string>
+    <string name="queue_image_number">이미지 %1$d</string>
+    <string name="queue_waiting">분석 대기 중</string>
+    <string name="queue_running">분석 중</string>
 </resources>

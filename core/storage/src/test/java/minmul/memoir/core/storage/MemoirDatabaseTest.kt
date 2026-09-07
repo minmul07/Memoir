@@ -1,5 +1,6 @@
 package minmul.memoir.core.storage
 
+import app.cash.turbine.test
 import androidx.sqlite.SQLiteException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,38 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MemoirDatabaseTest {
+    @Test
+    fun `queue observation emits saved images and removes deleted jobs`() = runDatabaseTest { db ->
+        db.analysisJobDao().observeQueue().test {
+            assertTrue(awaitItem().isEmpty())
+            db.contentWriteDao().insertItemsAndJobs(
+                listOf(ItemJobWrite(itemEntity("image"), jobEntity("job", "image"))),
+            )
+            assertEquals(
+                listOf(QueueEntry("job", "image", "items/image/original", JobStatus.Queued)),
+                awaitItem(),
+            )
+            db.analysisJobDao().deleteById("job")
+            assertTrue(awaitItem().isEmpty())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `queue includes only active jobs in queue order`() = runDatabaseTest { db ->
+        JobStatus.entries.forEachIndexed { index, status ->
+            val id = status.storedValue
+            db.itemDao().insert(itemEntity(id))
+            db.analysisJobDao().insert(
+                jobEntity(id, id, queueOrder = 10 - index).copy(status = status),
+            )
+        }
+        db.analysisJobDao().observeQueue().test {
+            assertEquals(listOf("running", "queued"), awaitItem().map { it.jobId })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `second job with the same item id fails`() = runDatabaseTest { db ->
         db.itemDao().insert(itemEntity("item-1"))

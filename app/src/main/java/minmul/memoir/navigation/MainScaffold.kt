@@ -1,5 +1,7 @@
 package minmul.memoir.navigation
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
@@ -138,10 +140,17 @@ fun MainScaffold(
                 onOpenItem = onOpenItem,
                 modifier = contentModifier,
             )
-            MainTab.Queue -> WorkQueueScreen(
-                onOpenHistory = onOpenHistory,
-                modifier = contentModifier,
-            )
+            MainTab.Queue -> {
+                val viewModel: WorkQueueViewModel = hiltViewModel()
+                val state by viewModel.uiState.collectAsStateWithLifecycle()
+                WorkQueueScreen(
+                    items = state.items,
+                    isLoading = state.isLoading,
+                    failed = state.failed,
+                    onOpenHistory = onOpenHistory,
+                    modifier = contentModifier,
+                )
+            }
             MainTab.Settings -> when (settingsDestination) {
                 SettingsDestination.Root -> SettingsScreen(
                     onOpenModelManagement = {

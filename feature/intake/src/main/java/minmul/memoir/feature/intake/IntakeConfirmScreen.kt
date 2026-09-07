@@ -1,5 +1,7 @@
 package minmul.memoir.feature.intake
 
+import minmul.memoir.core.design.ImageThumbnail
+import androidx.compose.ui.platform.LocalInspectionMode
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,12 +49,13 @@ fun IntakeConfirmScreen(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val preview = LocalInspectionMode.current
     val addEnabled = !isSubmitting && items.any { !it.failed }
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.intake_confirm_title)) },
+                title = { Text(if (preview) "…" else stringResource(R.string.intake_confirm_title)) },
             )
         },
     ) { innerPadding ->
@@ -62,7 +65,7 @@ fun IntakeConfirmScreen(
                 .padding(innerPadding),
         ) {
             Text(
-                text = stringResource(R.string.intake_image_count, items.size),
+                text = if (preview) "…" else stringResource(R.string.intake_image_count, items.size),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -86,13 +89,18 @@ fun IntakeConfirmScreen(
                         color = containerColor,
                         shape = MaterialTheme.shapes.medium,
                     ) {
-                        if (item.failed) {
+                        if (!item.failed) {
+                            ImageThumbnail(
+                                imagePath = item.imageUri.toString(),
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
-                                    text = stringResource(R.string.intake_image_import_failed),
+                                    text = if (preview) "…" else stringResource(R.string.intake_image_import_failed),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
@@ -116,7 +124,7 @@ fun IntakeConfirmScreen(
                         enabled = addEnabled,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(stringResource(R.string.action_add_to_queue))
+                        Text(if (preview) "…" else stringResource(R.string.action_add_to_queue))
                     }
                 }
             }
@@ -126,7 +134,7 @@ fun IntakeConfirmScreen(
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             ) {
-                Text(stringResource(R.string.action_cancel))
+                Text(if (preview) "…" else stringResource(R.string.action_cancel))
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
