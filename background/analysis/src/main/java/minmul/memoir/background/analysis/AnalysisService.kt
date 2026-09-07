@@ -1,16 +1,27 @@
 package minmul.memoir.background.analysis
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import minmul.memoir.core.ai.AnalysisLog
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AnalysisService : Service() {
@@ -25,6 +36,7 @@ class AnalysisService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         latestStartId = startId
         requests++
+        AnalysisLog.write("service start id=$startId requests=$requests active=${work != null}")
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL,
             getString(R.string.analysis_channel), NotificationManager.IMPORTANCE_LOW))
@@ -45,7 +57,9 @@ class AnalysisService : Service() {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING
             else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             startForeground(1, notification, type)
-        } catch (_: Exception) {
+            AnalysisLog.write("service foreground type=$type")
+        } catch (error: Exception) {
+            AnalysisLog.write("service failure error=${error.javaClass.simpleName}")
             mutableFailed.value = true
             stopSelfResult(startId)
             return START_NOT_STICKY
@@ -60,9 +74,11 @@ class AnalysisService : Service() {
                     } while (version != requests)
                 } catch (cancelled: CancellationException) {
                     throw cancelled
-                } catch (_: Exception) {
+                } catch (error: Exception) {
+                    AnalysisLog.write("service failure error=${error.javaClass.simpleName}")
                     mutableFailed.value = true
                 } finally {
+                    AnalysisLog.write("service drain_finished stopId=$latestStartId")
                     work = null
                     stopSelfResult(latestStartId)
                 }
@@ -72,12 +88,14 @@ class AnalysisService : Service() {
     }
 
     override fun onTimeout(startId: Int, fgsType: Int) {
+        AnalysisLog.write("service timeout id=$startId type=$fgsType")
         mutableFailed.value = true
         scope.cancel()
         stopSelf()
     }
 
     override fun onDestroy() {
+        AnalysisLog.write("service destroyed")
         scope.cancel()
         super.onDestroy()
     }
@@ -89,8 +107,10 @@ class AnalysisService : Service() {
 
         fun start(context: Context) {
             try {
+                AnalysisLog.write("service start_requested")
                 context.startForegroundService(Intent(context, AnalysisService::class.java))
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                AnalysisLog.write("service failure error=${error.javaClass.simpleName}")
                 mutableFailed.value = true
             }
         }

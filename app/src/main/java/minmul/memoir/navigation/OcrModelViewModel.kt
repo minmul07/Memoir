@@ -3,17 +3,17 @@ package minmul.memoir.navigation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import minmul.memoir.core.ai.KoreanOcrEngine
+import minmul.memoir.core.ai.MultilingualOcrEngine
+import javax.inject.Inject
 
 enum class OcrModelState { Checking, Missing, Installing, Ready, Failed }
 
 @HiltViewModel
-class OcrModelViewModel @Inject constructor(private val ocr: KoreanOcrEngine) : ViewModel() {
+class OcrModelViewModel @Inject constructor(private val ocr: MultilingualOcrEngine) : ViewModel() {
     private val mutableState = MutableStateFlow(OcrModelState.Checking)
     val state = mutableState.asStateFlow()
     init { check(false) }

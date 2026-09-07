@@ -99,11 +99,11 @@
     <string name="developer_delete_items">저장된 모든 아이템 삭제</string>
     <string name="queue_delete_confirmation">대기·분석 중인 작업을 삭제합니다. 원본 아이템과 완료 기록은 남습니다.</string>
     <string name="all_items_delete_confirmation">저장된 모든 원본 이미지, 큐, 분석 기록과 결과를 삭제합니다.</string>
-    <string name="ocr_model_checking">한국어 OCR 모델 확인 중</string>
-    <string name="ocr_model_missing">한국어 OCR 모델 다운로드 필요</string>
-    <string name="ocr_model_installing">한국어 OCR 모델 다운로드 중</string>
-    <string name="ocr_model_ready">한국어 OCR 모델 사용 가능</string>
-    <string name="ocr_model_failed">한국어 OCR 모델 확인·다운로드 실패</string>
+    <string name="ocr_model_checking">OCR 모델 5종 확인 중</string>
+    <string name="ocr_model_missing">OCR 모델 5종 다운로드 필요</string>
+    <string name="ocr_model_installing">OCR 모델 5종 다운로드 중</string>
+    <string name="ocr_model_ready">OCR 모델 5종 사용 가능</string>
+    <string name="ocr_model_failed">OCR 모델 5종 확인·다운로드 실패</string>
     <string name="ocr_model_download">모델 확인 / 다운로드</string>
     <string name="archive_empty">저장된 아이템이 없습니다.</string>
     <string name="analysis_unqueued">분석 작업 없음</string>
