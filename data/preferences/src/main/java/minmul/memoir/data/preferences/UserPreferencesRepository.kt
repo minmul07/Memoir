@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.OcrModel
 import minmul.memoir.core.storage.UserPreferencesKeys
 import minmul.memoir.core.storage.userPreferencesDataStore
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class UserPreferencesRepository internal constructor(
     private val dataStore: DataStore<Preferences>,
-) : OnboardingProgressStore, OcrModelPreferencesStore {
+) : OnboardingProgressStore, OcrModelPreferencesStore, GemmaModelPreferencesStore {
     @Inject
     constructor(@ApplicationContext context: Context) : this(context.userPreferencesDataStore)
 
@@ -30,6 +31,17 @@ class UserPreferencesRepository internal constructor(
             val disabled = preferences[UserPreferencesKeys.DISABLED_OCR_MODELS].orEmpty()
             preferences[UserPreferencesKeys.DISABLED_OCR_MODELS] =
                 if (enabled) disabled - model.name else disabled + model.name
+        }
+    }
+
+    override val selectedGemmaModel: Flow<GemmaModel?> = dataStore.data.map { preferences ->
+        val stored = preferences[UserPreferencesKeys.SELECTED_GEMMA_MODEL] ?: return@map null
+        GemmaModel.entries.firstOrNull { it.name == stored }
+    }
+
+    override suspend fun setSelectedGemmaModel(model: GemmaModel) {
+        dataStore.edit { preferences ->
+            preferences[UserPreferencesKeys.SELECTED_GEMMA_MODEL] = model.name
         }
     }
 

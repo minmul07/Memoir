@@ -44,6 +44,7 @@ dependencies {
     implementation(projects.core.design)
     implementation(projects.core.model)
     implementation(projects.core.ai)
+    implementation(projects.data.model)
     implementation(projects.data.preferences)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

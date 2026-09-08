@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 
@@ -13,5 +14,6 @@ val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataS
 
 object UserPreferencesKeys {
     val DISABLED_OCR_MODELS = stringSetPreferencesKey("disabled_ocr_models")
+    val SELECTED_GEMMA_MODEL = stringPreferencesKey("selected_gemma_model")
     val ONBOARDING_PROGRESS = intPreferencesKey("onboarding_progress")
 }

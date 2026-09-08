@@ -70,6 +70,7 @@ dependencies {
     implementation(projects.core.design)
     implementation(projects.core.storage)
     implementation(projects.data.content)
+    implementation(projects.data.model)
     implementation(projects.data.preferences)
     implementation(projects.feature.main)
     implementation(projects.feature.intake)

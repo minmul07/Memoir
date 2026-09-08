@@ -68,6 +68,14 @@
     <string name="model_section_multimodal">멀티모달</string>
     <string name="model_gemma_4_e4b">Gemma 4 E4B</string>
     <string name="model_gemma_4_e2b">Gemma 4 E2B</string>
+    <string name="gemma_model_details_e4b">약 3.7GB · 느리지만 높은 성능 · gemma-4-E4B-it.litertlm</string>
+    <string name="gemma_model_details_e2b">약 2.6GB · 빠른 속도 · gemma-4-E2B-it.litertlm</string>
+    <string name="gemma_models_policy">설치된 모델만 선택할 수 있습니다. 사용 중인 모델은 삭제할 수 없습니다.</string>
+    <string name="gemma_model_in_use">설치 완료 · 사용 중</string>
+    <string name="gemma_model_select_named">%1$s 모델 선택</string>
+    <string name="gemma_model_cancel_named">%1$s 모델 다운로드 취소</string>
+    <string name="gemma_model_delete_named">%1$s 모델 삭제</string>
+    <string name="gemma_model_delete_confirmation">다운로드한 모델 파일을 삭제합니다. 다시 쓰려면 새로 받아야 합니다.</string>
     <string name="model_section_ocr">OCR</string>
     <string name="model_mlkit_text_recognition_v2">ML Kit Text Recognition v2</string>
     <string name="model_section_embedding">임베딩</string>
