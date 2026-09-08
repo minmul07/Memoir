@@ -15,5 +15,6 @@ val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataS
 object UserPreferencesKeys {
     val DISABLED_OCR_MODELS = stringSetPreferencesKey("disabled_ocr_models")
     val SELECTED_GEMMA_MODEL = stringPreferencesKey("selected_gemma_model")
+    val ANALYSIS_QUEUE_MODE = stringPreferencesKey("analysis_queue_mode")
     val ONBOARDING_PROGRESS = intPreferencesKey("onboarding_progress")
 }

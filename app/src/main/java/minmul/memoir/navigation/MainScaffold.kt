@@ -37,7 +37,7 @@ import minmul.memoir.feature.queue.WorkQueueRoute
 import minmul.memoir.feature.settings.DeveloperOptionsScreen
 import minmul.memoir.feature.settings.ModelManagementRoute
 import minmul.memoir.feature.settings.SettingsDestination
-import minmul.memoir.feature.settings.SettingsScreen
+import minmul.memoir.feature.settings.SettingsRoute
 
 private enum class MainTab(
     @StringRes val labelRes: Int,
@@ -155,7 +155,7 @@ fun MainScaffold(
                 modifier = contentModifier,
             )
             MainTab.Settings -> when (settingsDestination) {
-                SettingsDestination.Root -> SettingsScreen(
+                SettingsDestination.Root -> SettingsRoute(
                     onOpenModelManagement = {
                         settingsDestination = SettingsDestination.ModelManagement
                     },

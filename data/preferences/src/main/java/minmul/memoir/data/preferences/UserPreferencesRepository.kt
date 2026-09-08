@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import minmul.memoir.core.model.AnalysisQueueMode
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.OcrModel
 import minmul.memoir.core.storage.UserPreferencesKeys
@@ -17,7 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class UserPreferencesRepository internal constructor(
     private val dataStore: DataStore<Preferences>,
-) : OnboardingProgressStore, OcrModelPreferencesStore, GemmaModelPreferencesStore {
+) : OnboardingProgressStore, OcrModelPreferencesStore, GemmaModelPreferencesStore,
+    AnalysisQueueModeStore {
     @Inject
     constructor(@ApplicationContext context: Context) : this(context.userPreferencesDataStore)
 
@@ -42,6 +44,17 @@ class UserPreferencesRepository internal constructor(
     override suspend fun setSelectedGemmaModel(model: GemmaModel) {
         dataStore.edit { preferences ->
             preferences[UserPreferencesKeys.SELECTED_GEMMA_MODEL] = model.name
+        }
+    }
+
+    override val analysisQueueMode: Flow<AnalysisQueueMode> = dataStore.data.map { preferences ->
+        val stored = preferences[UserPreferencesKeys.ANALYSIS_QUEUE_MODE]
+        AnalysisQueueMode.entries.firstOrNull { it.name == stored } ?: AnalysisQueueMode.Immediate
+    }
+
+    override suspend fun setAnalysisQueueMode(mode: AnalysisQueueMode) {
+        dataStore.edit { preferences ->
+            preferences[UserPreferencesKeys.ANALYSIS_QUEUE_MODE] = mode.name
         }
     }
 
