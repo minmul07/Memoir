@@ -1,9 +1,9 @@
-package minmul.memoir.intake
+package minmul.memoir.feature.intake
 
-import kotlinx.coroutines.flow.flowOf
-import minmul.memoir.core.model.QueueItem
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.flowOf
 import minmul.memoir.core.model.ItemSource
+import minmul.memoir.core.model.QueueItem
 import minmul.memoir.data.content.ContentRepository
 import minmul.memoir.data.content.ImportedOriginal
 

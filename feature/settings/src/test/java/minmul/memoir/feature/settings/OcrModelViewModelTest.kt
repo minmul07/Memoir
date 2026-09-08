@@ -1,4 +1,4 @@
-package minmul.memoir.navigation
+package minmul.memoir.feature.settings
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers

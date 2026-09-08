@@ -33,9 +33,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.R
 import minmul.memoir.feature.main.HomeScreen
-import minmul.memoir.feature.queue.WorkQueueScreen
+import minmul.memoir.feature.queue.WorkQueueRoute
 import minmul.memoir.feature.settings.DeveloperOptionsScreen
-import minmul.memoir.feature.settings.ModelManagementScreen
+import minmul.memoir.feature.settings.ModelManagementRoute
 import minmul.memoir.feature.settings.SettingsDestination
 import minmul.memoir.feature.settings.SettingsScreen
 
@@ -147,22 +147,13 @@ fun MainScaffold(
                 onOpenItem = onOpenItem,
                 modifier = contentModifier,
             )
-            MainTab.Queue -> {
-                val viewModel: WorkQueueViewModel = hiltViewModel()
-                val state by viewModel.uiState.collectAsStateWithLifecycle()
-                WorkQueueScreen(
-                    items = state.items,
-                    onCancel = actions::cancel,
-                    onOpenItem = onOpenItem,
-                    onStart = { AnalysisService.start(context) },
-                    actionFailed = actionFailed,
-                    serviceFailed = serviceFailed,
-                    isLoading = state.isLoading,
-                    failed = state.failed,
-                    onOpenHistory = onOpenHistory,
-                    modifier = contentModifier,
-                )
-            }
+            MainTab.Queue -> WorkQueueRoute(
+                onOpenHistory = onOpenHistory,
+                onOpenItem = onOpenItem,
+                onStart = { AnalysisService.start(context) },
+                serviceFailed = serviceFailed,
+                modifier = contentModifier,
+            )
             MainTab.Settings -> when (settingsDestination) {
                 SettingsDestination.Root -> SettingsScreen(
                     onOpenModelManagement = {
@@ -173,21 +164,9 @@ fun MainScaffold(
                     },
                     modifier = contentModifier,
                 )
-                SettingsDestination.ModelManagement -> {
-                    val model: OcrModelViewModel = hiltViewModel()
-                    val modelState by model.state.collectAsStateWithLifecycle()
-                    LaunchedEffect(model) { model.refresh() }
-                    ModelManagementScreen(
-                        modifier = contentModifier,
-                        ocrModels = modelState.models,
-                        preferencesLoaded = modelState.preferencesLoaded,
-                        preferencesFailed = modelState.preferencesFailed,
-                        savingModels = modelState.savingModels,
-                        onOcrEnabledChange = model::setEnabled,
-                        onInstallOcr = model::install,
-                        onRefreshOcr = model::refresh,
-                    )
-                }
+                SettingsDestination.ModelManagement -> ModelManagementRoute(
+                    modifier = contentModifier,
+                )
                 SettingsDestination.DeveloperOptions -> DeveloperOptionsScreen(
                     onResetOnboarding = onResetOnboarding,
                     onDeleteQueue = actions::deleteQueue,

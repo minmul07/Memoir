@@ -1,4 +1,4 @@
-package minmul.memoir.intake
+package minmul.memoir.feature.intake
 
 import app.cash.turbine.test
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import minmul.memoir.data.preferences.OnboardingProgress
-import minmul.memoir.navigation.FakeOnboardingProgressStore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

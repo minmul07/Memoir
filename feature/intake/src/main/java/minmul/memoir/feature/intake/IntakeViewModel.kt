@@ -1,11 +1,8 @@
-package minmul.memoir.intake
+package minmul.memoir.feature.intake
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
-import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
@@ -29,6 +26,9 @@ import minmul.memoir.data.content.ContentRepository
 import minmul.memoir.data.content.ImportedOriginal
 import minmul.memoir.data.preferences.OnboardingProgress
 import minmul.memoir.data.preferences.OnboardingProgressStore
+import java.util.UUID
+import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
 data class IntakeDraft(
