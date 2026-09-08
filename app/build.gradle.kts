@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.Test
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -64,6 +62,7 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.hilt.android)
+    implementation(libs.timber)
     implementation(projects.background.analysis)
     implementation(projects.core.model)
     implementation(projects.core.ai)

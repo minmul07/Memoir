@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     api(projects.core.model)
     implementation(projects.core.storage)
+    implementation(libs.timber)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
