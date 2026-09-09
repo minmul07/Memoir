@@ -39,7 +39,7 @@ fun SettingsScreen(
     onOpenModelManagement: () -> Unit,
     onOpenDeveloperOptions: () -> Unit,
     modifier: Modifier = Modifier,
-    analysisQueueMode: AnalysisQueueMode = AnalysisQueueMode.Immediate,
+    analysisQueueMode: AnalysisQueueMode = AnalysisQueueMode.Manual,
     analysisQueueModeLoaded: Boolean = true,
     analysisQueueModeFailed: Boolean = false,
     onAnalysisQueueModeChange: (AnalysisQueueMode) -> Unit = {},
@@ -168,9 +168,9 @@ private fun AnalysisQueueModeDialog(
 
 @StringRes
 private fun AnalysisQueueMode.labelRes(): Int = when (this) {
-    AnalysisQueueMode.Immediate -> R.string.queue_analyze_now
     AnalysisQueueMode.Manual -> R.string.settings_manual_analysis
     AnalysisQueueMode.Scheduled -> R.string.settings_scheduled_analysis
+    AnalysisQueueMode.Immediate -> R.string.queue_analyze_now
 }
 
 @Preview(showBackground = true)

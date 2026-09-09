@@ -49,7 +49,7 @@ class UserPreferencesRepository internal constructor(
 
     override val analysisQueueMode: Flow<AnalysisQueueMode> = dataStore.data.map { preferences ->
         val stored = preferences[UserPreferencesKeys.ANALYSIS_QUEUE_MODE]
-        AnalysisQueueMode.entries.firstOrNull { it.name == stored } ?: AnalysisQueueMode.Immediate
+        AnalysisQueueMode.entries.firstOrNull { it.name == stored } ?: AnalysisQueueMode.Manual
     }
 
     override suspend fun setAnalysisQueueMode(mode: AnalysisQueueMode) {

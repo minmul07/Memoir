@@ -52,8 +52,8 @@ class SettingsViewModelTest {
             advanceUntilIdle()
             viewModel.setAnalysisQueueMode(AnalysisQueueMode.Scheduled)
             advanceUntilIdle()
-            assertEquals(AnalysisQueueMode.Immediate, preferences.analysisQueueMode.value)
-            assertEquals(AnalysisQueueMode.Immediate, viewModel.state.value.analysisQueueMode)
+            assertEquals(AnalysisQueueMode.Manual, preferences.analysisQueueMode.value)
+            assertEquals(AnalysisQueueMode.Manual, viewModel.state.value.analysisQueueMode)
             assertTrue(viewModel.state.value.preferencesFailed)
             assertFalse(viewModel.state.value.saving)
         } finally {
@@ -63,7 +63,7 @@ class SettingsViewModelTest {
     }
 
     private class FakePreferences : AnalysisQueueModeStore {
-        override val analysisQueueMode = MutableStateFlow(AnalysisQueueMode.Immediate)
+        override val analysisQueueMode = MutableStateFlow(AnalysisQueueMode.Manual)
         var failWrites = false
         override suspend fun setAnalysisQueueMode(mode: AnalysisQueueMode) {
             check(!failWrites) { "write_failed" }

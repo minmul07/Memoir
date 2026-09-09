@@ -18,14 +18,14 @@ import minmul.memoir.data.preferences.AnalysisQueueModeStore
 import javax.inject.Inject
 
 data class SettingsUiState(
-    val analysisQueueMode: AnalysisQueueMode = AnalysisQueueMode.Immediate,
+    val analysisQueueMode: AnalysisQueueMode = AnalysisQueueMode.Manual,
     val preferencesLoaded: Boolean = false,
     val preferencesFailed: Boolean = false,
     val saving: Boolean = false,
 )
 
 private data class AnalysisQueueModeSelection(
-    val mode: AnalysisQueueMode = AnalysisQueueMode.Immediate,
+    val mode: AnalysisQueueMode = AnalysisQueueMode.Manual,
     val loaded: Boolean = false,
     val failed: Boolean = false,
 )

@@ -28,8 +28,8 @@ class AnalysisQueueModePreferencesTest {
             val repository = UserPreferencesRepository(
                 PreferenceDataStoreFactory.create(scope = firstScope) { file },
             )
-            assertEquals(AnalysisQueueMode.Immediate, repository.analysisQueueMode.first())
-            repository.setAnalysisQueueMode(AnalysisQueueMode.Manual)
+            assertEquals(AnalysisQueueMode.Manual, repository.analysisQueueMode.first())
+            repository.setAnalysisQueueMode(AnalysisQueueMode.Immediate)
         } finally {
             firstScope.coroutineContext[Job]!!.cancelAndJoin()
         }
@@ -39,14 +39,14 @@ class AnalysisQueueModePreferencesTest {
             val repository = UserPreferencesRepository(
                 PreferenceDataStoreFactory.create(scope = secondScope) { file },
             )
-            assertEquals(AnalysisQueueMode.Manual, repository.analysisQueueMode.first())
+            assertEquals(AnalysisQueueMode.Immediate, repository.analysisQueueMode.first())
         } finally {
             secondScope.coroutineContext[Job]!!.cancelAndJoin()
         }
     }
 
     @Test
-    fun `unknown analysis queue mode defaults to immediate`() = runTest {
+    fun `unknown analysis queue mode defaults to manual`() = runTest {
         val file = File(directory, "mode.preferences_pb")
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         try {
@@ -55,7 +55,7 @@ class AnalysisQueueModePreferencesTest {
                 preferences[UserPreferencesKeys.ANALYSIS_QUEUE_MODE] = "Nope"
             }
             val repository = UserPreferencesRepository(dataStore)
-            assertEquals(AnalysisQueueMode.Immediate, repository.analysisQueueMode.first())
+            assertEquals(AnalysisQueueMode.Manual, repository.analysisQueueMode.first())
         } finally {
             scope.coroutineContext[Job]!!.cancelAndJoin()
         }
