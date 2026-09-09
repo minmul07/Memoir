@@ -63,6 +63,7 @@ fun MainScaffold(
     val busy by actions.busy.collectAsStateWithLifecycle()
     val actionFailed by actions.failed.collectAsStateWithLifecycle()
     val serviceFailed by AnalysisService.failed.collectAsStateWithLifecycle()
+    val llmStatus by actions.llmStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Home) }
     var settingsDestination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
@@ -152,6 +153,7 @@ fun MainScaffold(
                 onOpenItem = onOpenItem,
                 onStart = { AnalysisService.start(context) },
                 serviceFailed = serviceFailed,
+                llmStatus = llmStatus,
                 modifier = contentModifier,
             )
             MainTab.Settings -> when (settingsDestination) {

@@ -270,6 +270,40 @@ class MemoirDatabaseTest {
         assertEquals(setOf("a", "b"), selected.toSet())
         assertEquals(2, selected.size)
     }
+
+    @Test
+    fun `hasQueuedWork is true only for queued jobs and does not claim`() = runDatabaseTest { db ->
+        val dao = db.analysisWorkDao()
+        assertEquals(false, dao.hasQueuedWork())
+        db.contentWriteDao()
+            .insertItemsAndJobs(listOf(ItemJobWrite(itemEntity("a"), jobEntity("a", "a"))))
+        assertEquals(true, dao.hasQueuedWork())
+        assertEquals(JobStatus.Queued, dao.job("a")?.status)
+        dao.claimNext(2)
+        assertEquals(false, dao.hasQueuedWork())
+        assertEquals(JobStatus.Running, dao.job("a")?.status)
+    }
+
+    @Test
+    fun `failActiveQueue marks queued and running jobs failed without retry`() =
+        runDatabaseTest { db ->
+            db.contentWriteDao().insertItemsAndJobs(
+                listOf(
+                    ItemJobWrite(itemEntity("a"), jobEntity("a", "a")),
+                    ItemJobWrite(itemEntity("b"), jobEntity("b", "b")),
+                )
+            )
+            val dao = db.analysisWorkDao()
+            dao.claimNext(2)
+            dao.failActiveQueue("model_load_failed", 3)
+            assertEquals(JobStatus.Failed, dao.job("a")?.status)
+            assertEquals(JobStatus.Failed, dao.job("b")?.status)
+            assertEquals("model_load_failed", dao.job("a")?.errorMessage)
+            assertEquals("model_load_failed", dao.job("b")?.errorMessage)
+            assertEquals(0, dao.job("a")?.attemptCount)
+            assertEquals(0, dao.job("b")?.attemptCount)
+            assertNull(dao.claimNext(4))
+        }
     private fun runDatabaseTest(testBody: suspend TestScope.(MemoirDatabase) -> Unit) = runTest {
         val db = MemoirDatabase.createInMemory(StandardTestDispatcher(testScheduler))
         try {

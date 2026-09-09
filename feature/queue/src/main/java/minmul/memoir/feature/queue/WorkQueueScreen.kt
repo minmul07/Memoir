@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
+import minmul.memoir.core.design.llmRuntimeStatusText
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.JobStatus
+import minmul.memoir.core.model.LlmRuntimeStatus
 import minmul.memoir.core.model.QueueItem
 
 @Composable
@@ -43,8 +45,10 @@ fun WorkQueueScreen(
     onStart: () -> Unit = {},
     actionFailed: Boolean = false,
     serviceFailed: Boolean = false,
+    llmStatus: LlmRuntimeStatus = LlmRuntimeStatus.Idle,
 ) {
     val preview = LocalInspectionMode.current
+    val llmStatusText = llmRuntimeStatusText(llmStatus)
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -96,6 +100,7 @@ fun WorkQueueScreen(
             }
             if (actionFailed) Text(stringResource(R.string.content_action_failed))
             if (serviceFailed) Text(stringResource(R.string.analysis_service_failed))
+            if (llmStatusText != null) Text(llmStatusText)
             TextButton(onClick = onOpenHistory, modifier = Modifier.fillMaxWidth()) {
                 Text(if (preview) "…" else stringResource(R.string.nav_analysis_history))
             }
@@ -105,7 +110,7 @@ fun WorkQueueScreen(
                 onClick = onStart,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 80.dp),
+                    .padding(end = 16.dp, bottom = if (llmStatusText != null) 96.dp else 80.dp),
             ) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,

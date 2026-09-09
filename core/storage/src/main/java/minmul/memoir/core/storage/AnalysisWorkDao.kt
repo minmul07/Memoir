@@ -29,6 +29,9 @@ abstract class AnalysisWorkDao {
         LEFT JOIN analysis_results r ON r.item_id = i.id WHERE i.id = :itemId""")
     abstract fun observeDetail(itemId: String): Flow<DetailEntry?>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM analysis_jobs WHERE status = 'queued')")
+    abstract suspend fun hasQueuedWork(): Boolean
+
     @Query("""SELECT * FROM analysis_jobs WHERE status = 'queued'
         ORDER BY attempt_count, queue_order, created_at, id LIMIT 1""")
     protected abstract suspend fun next(): AnalysisJobEntity?
@@ -76,6 +79,16 @@ abstract class AnalysisWorkDao {
         attempt_count = 1, error_message = :error
         WHERE id = :id AND status = 'running'""")
     abstract suspend fun fail(id: String, error: String, now: Long)
+
+    @Query(
+        """UPDATE analysis_jobs SET
+        status = 'failed',
+        stage = 'waiting',
+        finished_at = :now,
+        error_message = :error
+        WHERE status IN ('queued', 'running')"""
+    )
+    abstract suspend fun failActiveQueue(error: String, now: Long)
 
     @Query("UPDATE analysis_jobs SET status = 'failed', error_message = 'interrupted', finished_at = :now WHERE status = 'running'")
     abstract suspend fun recoverInterrupted(now: Long)

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import minmul.memoir.core.model.LlmRuntimeStatus
 
 @Composable
 fun WorkQueueRoute(
@@ -12,6 +13,7 @@ fun WorkQueueRoute(
     onOpenItem: (String) -> Unit,
     onStart: () -> Unit,
     serviceFailed: Boolean,
+    llmStatus: LlmRuntimeStatus,
     modifier: Modifier = Modifier,
     viewModel: WorkQueueViewModel = hiltViewModel(),
 ) {
@@ -27,6 +29,7 @@ fun WorkQueueRoute(
         onStart = onStart,
         actionFailed = actionFailed,
         serviceFailed = serviceFailed,
+        llmStatus = llmStatus,
         modifier = modifier,
     )
 }

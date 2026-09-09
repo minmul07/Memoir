@@ -26,6 +26,7 @@ playServicesBase = "18.10.1"
 room3 = "3.0.2"
 sqlite = "2.7.0"
 timber = "5.0.1"
+litertlm = "0.16.1"
 
 [libraries]
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
@@ -71,6 +72,7 @@ play-services-mlkit-text-recognition-japanese = { group = "com.google.android.gm
 play-services-mlkit-text-recognition-chinese = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-chinese", version = "16.0.1" }
 play-services-mlkit-text-recognition-devanagari = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-devanagari", version = "16.0.1" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

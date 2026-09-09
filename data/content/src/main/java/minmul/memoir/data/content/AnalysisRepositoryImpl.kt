@@ -1,11 +1,14 @@
 package minmul.memoir.data.content
 
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.map
-import minmul.memoir.core.model.*
+import minmul.memoir.core.model.ItemDetail
+import minmul.memoir.core.model.JobStage
+import minmul.memoir.core.model.OcrText
+import minmul.memoir.core.model.QueueItem
 import minmul.memoir.core.storage.MemoirDatabase
 import minmul.memoir.core.storage.QueueEntry
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class AnalysisRepositoryImpl @Inject constructor(
@@ -20,12 +23,15 @@ class AnalysisRepositoryImpl @Inject constructor(
     override fun observeDetail(itemId: String) = dao.observeDetail(itemId).map { entry ->
         entry?.let { ItemDetail(it.itemId, it.imagePath, it.status, it.ocrText, it.payloadJson) }
     }
+    override suspend fun hasQueuedWork() = dao.hasQueuedWork()
     override suspend fun claimNext() = dao.claimNext(System.currentTimeMillis())?.toModel()
     override suspend fun setStage(jobId: String, stage: JobStage) = dao.setStage(jobId, stage)
     override suspend fun complete(jobId: String, ocrText: String?, payloadJson: String) =
         dao.complete(jobId, OcrText.stored(ocrText), payloadJson, System.currentTimeMillis())
     override suspend fun fail(jobId: String, errorCode: String) =
         dao.fail(jobId, errorCode, System.currentTimeMillis())
+    override suspend fun failActiveQueue(errorCode: String) =
+        dao.failActiveQueue(errorCode, System.currentTimeMillis())
     override suspend fun recoverInterrupted() = dao.recoverInterrupted(System.currentTimeMillis())
     override suspend fun cancel(jobId: String) = dao.cancel(jobId, System.currentTimeMillis())
     override suspend fun deleteQueue() = dao.deleteQueue()

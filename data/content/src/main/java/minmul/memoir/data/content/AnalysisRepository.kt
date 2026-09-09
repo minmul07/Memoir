@@ -1,16 +1,20 @@
 package minmul.memoir.data.content
 
 import kotlinx.coroutines.flow.Flow
-import minmul.memoir.core.model.*
+import minmul.memoir.core.model.ItemDetail
+import minmul.memoir.core.model.JobStage
+import minmul.memoir.core.model.QueueItem
 
 interface AnalysisRepository {
     fun observeItems(): Flow<List<ItemDetail>>
     fun observeHistory(): Flow<List<QueueItem>>
     fun observeDetail(itemId: String): Flow<ItemDetail?>
+    suspend fun hasQueuedWork(): Boolean
     suspend fun claimNext(): QueueItem?
     suspend fun setStage(jobId: String, stage: JobStage)
     suspend fun complete(jobId: String, ocrText: String?, payloadJson: String)
     suspend fun fail(jobId: String, errorCode: String)
+    suspend fun failActiveQueue(errorCode: String)
     suspend fun recoverInterrupted()
     suspend fun cancel(jobId: String)
     suspend fun deleteItem(itemId: String)

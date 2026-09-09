@@ -99,6 +99,10 @@
     <string name="analysis_saving">DB 저장 중</string>
     <string name="analysis_restart">분석 시작 / 재개</string>
     <string name="analysis_service_failed">분석이 중단되었습니다. 다시 시작해 주세요.</string>
+    <string name="llm_status_missing">사용 가능한 Gemma 모델이 없습니다</string>
+    <string name="llm_status_loading">%1$s GPU 로드 중</string>
+    <string name="llm_status_ready">%1$s 로드됨</string>
+    <string name="llm_status_failed">%1$s 로드 실패 · %2$s</string>
     <string name="content_action_failed">작업을 완료하지 못했습니다. 다시 시도해 주세요.</string>
     <string name="item_missing">항목이 없거나 삭제되었습니다.</string>
     <string name="ocr_empty">인식된 텍스트가 없습니다.</string>
