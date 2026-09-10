@@ -18,6 +18,7 @@ class FakeContentRepository(
     private val holds = holdUris.associateWith { CompletableDeferred<Unit>() }
     val imported = mutableListOf<Pair<String, String>>()
     val enqueued = mutableListOf<List<ImportedOriginal>>()
+    val enqueueSources = mutableListOf<ItemSource>()
     val discarded = mutableListOf<List<String>>()
     var enqueueAttempts = 0
         private set
@@ -40,12 +41,12 @@ class FakeContentRepository(
     }
 
     override suspend fun enqueueImported(items: List<ImportedOriginal>, source: ItemSource) {
-        check(source == ItemSource.Share)
         enqueueAttempts++
         if (enqueueFailuresRemaining > 0) {
             enqueueFailuresRemaining--
             error("enqueue failed")
         }
+        enqueueSources += source
         enqueued += items
     }
 

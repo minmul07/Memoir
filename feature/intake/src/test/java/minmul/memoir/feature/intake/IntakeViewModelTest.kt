@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import minmul.memoir.core.model.ItemSource
 import minmul.memoir.data.preferences.OnboardingProgress
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,7 +92,27 @@ class IntakeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertEquals(1, repository.enqueued.single().size)
+        assertEquals(listOf(ItemSource.Share), repository.enqueueSources)
         assertEquals(uri, repository.imported.single().second)
+    }
+
+    @Test
+    fun `add enqueues picker items with picker source`() = runViewModelTest {
+        val uri = "content://images/1"
+        val repository = FakeContentRepository()
+        val viewModel = createViewModel(repository = repository)
+        viewModel.start(listOf(uri), ItemSource.Picker)
+        advanceUntilIdle()
+
+        viewModel.onAdd()
+        advanceUntilIdle()
+
+        viewModel.uiState.test {
+            assertEquals(IntakeUiState.OpenQueue, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertEquals(listOf(ItemSource.Picker), repository.enqueueSources)
+        assertEquals(1, repository.enqueued.single().size)
     }
 
     @Test

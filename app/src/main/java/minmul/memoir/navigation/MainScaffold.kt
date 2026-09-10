@@ -1,6 +1,9 @@
 package minmul.memoir.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -38,6 +41,7 @@ import minmul.memoir.feature.settings.DeveloperOptionsScreen
 import minmul.memoir.feature.settings.ModelManagementRoute
 import minmul.memoir.feature.settings.SettingsDestination
 import minmul.memoir.feature.settings.SettingsRoute
+import minmul.memoir.intake.IntakeIntents
 
 private enum class MainTab(
     @StringRes val labelRes: Int,
@@ -65,6 +69,14 @@ fun MainScaffold(
     val serviceFailed by AnalysisService.failed.collectAsStateWithLifecycle()
     val llmStatus by actions.llmStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+    ) { uris ->
+        if (uris.isEmpty()) {
+            return@rememberLauncherForActivityResult
+        }
+        context.startActivity(IntakeIntents.picker(context, uris))
+    }
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Home) }
     var settingsDestination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
     val canNavigateBack = selectedTab == MainTab.Settings &&
@@ -110,7 +122,13 @@ fun MainScaffold(
         },
         floatingActionButton = {
             if (selectedTab == MainTab.Home) {
-                FloatingActionButton(onClick = {}) {
+                FloatingActionButton(
+                    onClick = {
+                        photoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = stringResource(R.string.action_add_to_queue),

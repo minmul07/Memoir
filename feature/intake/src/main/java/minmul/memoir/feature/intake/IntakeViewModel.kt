@@ -60,6 +60,7 @@ class IntakeViewModel @Inject constructor(
     private var submitJob: Job? = null
     private var importStarted = false
     private var committed = false
+    private var source: ItemSource = ItemSource.Share
 
     private val onboardingProgress: StateFlow<Int?> = flow {
         onboardingProgressStore.normalizeOnboardingProgress()
@@ -114,8 +115,10 @@ class IntakeViewModel @Inject constructor(
         }
     }
 
-    fun start(imageUris: List<String>) {
-        receivedImageUris.compareAndSet(null, imageUris)
+    fun start(imageUris: List<String>, source: ItemSource = ItemSource.Share) {
+        if (receivedImageUris.compareAndSet(null, imageUris)) {
+            this.source = source
+        }
     }
 
     fun onAdd() {
@@ -130,9 +133,10 @@ class IntakeViewModel @Inject constructor(
                 if (ready.isEmpty()) {
                     return@launch
                 }
+                val itemSource = source
                 repeat(2) { attempt ->
                     try {
-                        contentRepository.enqueueImported(ready, ItemSource.Share)
+                        contentRepository.enqueueImported(ready, itemSource)
                         committed = true
                         userAction.value = UserAction.Add
                         return@launch
