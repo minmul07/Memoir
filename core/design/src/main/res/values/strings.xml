@@ -8,7 +8,6 @@
     <string name="action_agree">동의</string>
     <string name="action_disagree">비동의</string>
     <string name="action_delete">삭제</string>
-    <string name="action_more">더보기</string>
     <string name="action_cancel">취소</string>
     <string name="action_cancel_analysis">분석 취소</string>
     <string name="action_add_to_queue">큐에 추가</string>

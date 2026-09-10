@@ -1,5 +1,6 @@
 package minmul.memoir.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +18,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,10 +37,13 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
 import minmul.memoir.core.design.R
 import minmul.memoir.data.preferences.OnboardingProgress
-import minmul.memoir.feature.main.ArchiveRoute
 import minmul.memoir.feature.main.ItemDetailRoute
 import minmul.memoir.feature.onboarding.OnboardingRoute
 import minmul.memoir.feature.queue.AnalysisHistoryRoute
+import minmul.memoir.feature.settings.DeveloperOptionsScreen
+import minmul.memoir.feature.settings.ModelManagementRoute
+import minmul.memoir.feature.settings.SettingsDestination
+import minmul.memoir.feature.settings.SettingsRoute
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -125,11 +132,16 @@ private fun RootNavDisplay(
             }
             entry<Main> {
                 MainScaffold(
-                    onOpenArchive = { backStack.add(Archive) },
+                    onOpenSettings = { backStack.add(Settings) },
                     onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
                     onOpenHistory = { backStack.add(AnalysisHistory) },
                     openQueue = openQueue,
                     onOpenQueueConsumed = onOpenQueueConsumed,
+                )
+            }
+            entry<Settings> {
+                SettingsStack(
+                    onBack = { backStack.removeLastOrNull() },
                     onResetOnboarding = {
                         scope.launch {
                             onResetOnboarding()
@@ -137,17 +149,6 @@ private fun RootNavDisplay(
                         }
                     },
                 )
-            }
-            entry<Archive> {
-                StackScaffold(
-                    titleRes = R.string.nav_archive,
-                    onBack = { backStack.removeLastOrNull() },
-                ) { contentModifier ->
-                    ArchiveRoute(
-                        onOpenItem = { itemId -> backStack.add(ItemDetail(itemId)) },
-                        modifier = contentModifier,
-                    )
-                }
             }
             entry<AnalysisHistory> {
                 StackScaffold(
@@ -174,6 +175,58 @@ private fun RootNavDisplay(
             }
         },
     )
+}
+
+@Composable
+private fun SettingsStack(
+    onBack: () -> Unit,
+    onResetOnboarding: () -> Unit,
+) {
+    val actions: AnalysisActionsViewModel = hiltViewModel()
+    val busy by actions.busy.collectAsStateWithLifecycle()
+    val actionFailed by actions.failed.collectAsStateWithLifecycle()
+    var destination by rememberSaveable { mutableStateOf(SettingsDestination.Root) }
+    val canNavigateBack = destination != SettingsDestination.Root
+
+    BackHandler(enabled = canNavigateBack) {
+        destination = SettingsDestination.Root
+    }
+
+    StackScaffold(
+        titleRes = destination.labelRes,
+        onBack = {
+            if (canNavigateBack) {
+                destination = SettingsDestination.Root
+            } else {
+                onBack()
+            }
+        },
+    ) { contentModifier ->
+        when (destination) {
+            SettingsDestination.Root -> SettingsRoute(
+                onOpenModelManagement = {
+                    destination = SettingsDestination.ModelManagement
+                },
+                onOpenDeveloperOptions = {
+                    destination = SettingsDestination.DeveloperOptions
+                },
+                modifier = contentModifier,
+            )
+
+            SettingsDestination.ModelManagement -> ModelManagementRoute(
+                modifier = contentModifier,
+            )
+
+            SettingsDestination.DeveloperOptions -> DeveloperOptionsScreen(
+                onResetOnboarding = onResetOnboarding,
+                onDeleteQueue = actions::deleteQueue,
+                onDeleteAllItems = actions::deleteAllItems,
+                busy = busy,
+                failed = actionFailed,
+                modifier = contentModifier,
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
