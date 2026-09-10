@@ -14,11 +14,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,15 +32,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
+import minmul.memoir.core.design.component.DialogItem
 import minmul.memoir.core.design.component.ItemSection
 import minmul.memoir.core.design.component.NavigationItem
+import minmul.memoir.core.design.component.ToggleItem
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
 import minmul.memoir.core.model.GemmaModelStatus
 import minmul.memoir.core.model.OcrModel
 import minmul.memoir.core.model.OcrModelState
 import minmul.memoir.core.model.OcrModelStatus
+import kotlin.math.roundToInt
 
 @Composable
 fun ModelManagementScreen(
@@ -51,6 +57,14 @@ fun ModelManagementScreen(
     gemmaPreferencesLoaded: Boolean = true,
     gemmaPreferencesFailed: Boolean = false,
     gemmaSavingModels: Set<GemmaModel> = emptySet(),
+    inference: GemmaInferenceSettings = GemmaInferenceSettings(),
+    inferenceSaving: Boolean = false,
+    onMaxOutputTokenChange: (Int) -> Unit = {},
+    onTopKChange: (Int) -> Unit = {},
+    onTopPChange: (Double) -> Unit = {},
+    onTemperatureChange: (Double) -> Unit = {},
+    onThinkingEnabledChange: (Boolean) -> Unit = {},
+    onSpeculativeDecodingChange: (Boolean) -> Unit = {},
     ocrModels: List<OcrModelState> = OcrModel.entries.map { OcrModelState(it) },
     onInstallOcr: (OcrModel) -> Unit = {},
     onRefreshOcr: () -> Unit = {},
@@ -60,6 +74,8 @@ fun ModelManagementScreen(
     savingModels: Set<OcrModel> = emptySet(),
 ) {
     var deleteConfirm: GemmaModel? by remember { mutableStateOf(null) }
+    var inferenceDialog by remember { mutableStateOf<InferenceDialog?>(null) }
+    val inferenceEditable = gemmaPreferencesLoaded && !inferenceSaving
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -90,6 +106,38 @@ fun ModelManagementScreen(
                     )
                 }
             }
+            DialogItem(
+                title = stringResource(R.string.gemma_max_output_tokens),
+                value = inference.maxOutputToken.toString(),
+                onClick = { if (inferenceEditable) inferenceDialog = InferenceDialog.MaxOutputToken },
+            )
+            DialogItem(
+                title = stringResource(R.string.gemma_top_k),
+                value = inference.topK.toString(),
+                onClick = { if (inferenceEditable) inferenceDialog = InferenceDialog.TopK },
+            )
+            DialogItem(
+                title = stringResource(R.string.gemma_top_p),
+                value = inference.topP.toString(),
+                onClick = { if (inferenceEditable) inferenceDialog = InferenceDialog.TopP },
+            )
+            DialogItem(
+                title = stringResource(R.string.gemma_temperature),
+                value = inference.temperature.toString(),
+                onClick = { if (inferenceEditable) inferenceDialog = InferenceDialog.Temperature },
+            )
+            ToggleItem(
+                title = stringResource(R.string.gemma_thinking),
+                description = stringResource(R.string.gemma_thinking_description),
+                checked = inference.thinkingEnabled,
+                onCheckedChange = { if (inferenceEditable) onThinkingEnabledChange(it) },
+            )
+            ToggleItem(
+                title = stringResource(R.string.gemma_speculative_decoding),
+                description = stringResource(R.string.gemma_speculative_decoding_description),
+                checked = inference.speculativeDecodingEnabled,
+                onCheckedChange = { if (inferenceEditable) onSpeculativeDecodingChange(it) },
+            )
         }
         ItemSection(title = stringResource(R.string.model_section_ocr)) {
             Text(
@@ -149,6 +197,109 @@ fun ModelManagementScreen(
             },
         )
     }
+    when (inferenceDialog) {
+        InferenceDialog.MaxOutputToken -> InferenceSliderDialog(
+            title = stringResource(R.string.gemma_max_output_tokens),
+            value = inference.maxOutputToken.toFloat(),
+            valueRange = GemmaInferenceSettings.MIN_MAX_OUTPUT_TOKEN.toFloat()..
+                GemmaInferenceSettings.MAX_MAX_OUTPUT_TOKEN.toFloat(),
+            steps = (GemmaInferenceSettings.MAX_MAX_OUTPUT_TOKEN -
+                GemmaInferenceSettings.MIN_MAX_OUTPUT_TOKEN) /
+                GemmaInferenceSettings.MAX_OUTPUT_TOKEN_STEP - 1,
+            format = {
+                GemmaInferenceSettings.clamp(maxOutputToken = it.toInt()).maxOutputToken.toString()
+            },
+            onConfirm = { onMaxOutputTokenChange(it.toInt()) },
+            onDismiss = { inferenceDialog = null },
+        )
+        InferenceDialog.TopK -> InferenceSliderDialog(
+            title = stringResource(R.string.gemma_top_k),
+            value = inference.topK.toFloat(),
+            valueRange = GemmaInferenceSettings.MIN_TOP_K.toFloat()..
+                GemmaInferenceSettings.MAX_TOP_K.toFloat(),
+            steps = GemmaInferenceSettings.MAX_TOP_K - GemmaInferenceSettings.MIN_TOP_K - 1,
+            format = { GemmaInferenceSettings.clamp(topK = it.toInt()).topK.toString() },
+            onConfirm = { onTopKChange(it.toInt()) },
+            onDismiss = { inferenceDialog = null },
+        )
+        InferenceDialog.TopP -> InferenceSliderDialog(
+            title = stringResource(R.string.gemma_top_p),
+            value = inference.topP.toFloat(),
+            valueRange = GemmaInferenceSettings.MIN_TOP_P.toFloat()..
+                GemmaInferenceSettings.MAX_TOP_P.toFloat(),
+            steps = sliderSteps(
+                GemmaInferenceSettings.MIN_TOP_P,
+                GemmaInferenceSettings.MAX_TOP_P,
+                GemmaInferenceSettings.TOP_P_STEP,
+            ),
+            format = { GemmaInferenceSettings.clamp(topP = it.toDouble()).topP.toString() },
+            onConfirm = { onTopPChange(it.toDouble()) },
+            onDismiss = { inferenceDialog = null },
+        )
+        InferenceDialog.Temperature -> InferenceSliderDialog(
+            title = stringResource(R.string.gemma_temperature),
+            value = inference.temperature.toFloat(),
+            valueRange = GemmaInferenceSettings.MIN_TEMPERATURE.toFloat()..
+                GemmaInferenceSettings.MAX_TEMPERATURE.toFloat(),
+            steps = sliderSteps(
+                GemmaInferenceSettings.MIN_TEMPERATURE,
+                GemmaInferenceSettings.MAX_TEMPERATURE,
+                GemmaInferenceSettings.TEMPERATURE_STEP,
+            ),
+            format = {
+                GemmaInferenceSettings.clamp(temperature = it.toDouble()).temperature.toString()
+            },
+            onConfirm = { onTemperatureChange(it.toDouble()) },
+            onDismiss = { inferenceDialog = null },
+        )
+        null -> Unit
+    }
+}
+
+private enum class InferenceDialog { MaxOutputToken, TopK, TopP, Temperature }
+
+private fun sliderSteps(min: Double, max: Double, step: Double): Int =
+    ((max - min) / step).roundToInt() - 1
+
+@Composable
+private fun InferenceSliderDialog(
+    title: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    format: (Float) -> String,
+    onConfirm: (Float) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var draft by remember { mutableFloatStateOf(value) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column {
+                Text(format(draft))
+                Slider(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    valueRange = valueRange,
+                    steps = steps,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(draft)
+                    onDismiss()
+                },
+            ) { Text(stringResource(R.string.action_done)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+    )
 }
 
 @Composable

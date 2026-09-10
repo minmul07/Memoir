@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
 import minmul.memoir.core.model.GemmaModelStatus
@@ -165,6 +166,52 @@ class GemmaModelViewModelTest {
         }
     }
 
+    @Test
+    fun `inference settings load and setters update the shared preferences`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val preferences = FakePreferences().apply {
+            inferenceSettings.value = GemmaInferenceSettings(
+                maxOutputToken = 2048,
+                topK = 16,
+                thinkingEnabled = true,
+                topP = 0.8,
+                temperature = 0.5,
+                speculativeDecodingEnabled = false,
+            )
+        }
+        val viewModel = GemmaModelViewModel(FakeStore(), preferences)
+        try {
+            advanceUntilIdle()
+            assertEquals(
+                GemmaInferenceSettings(2048, 16, true, 0.8, 0.5, false),
+                viewModel.state.value.inference,
+            )
+            viewModel.setMaxOutputToken(512)
+            advanceUntilIdle()
+            viewModel.setTopK(8)
+            advanceUntilIdle()
+            viewModel.setThinkingEnabled(false)
+            advanceUntilIdle()
+            viewModel.setTopP(0.7)
+            advanceUntilIdle()
+            viewModel.setTemperature(1.2)
+            advanceUntilIdle()
+            viewModel.setSpeculativeDecodingEnabled(true)
+            advanceUntilIdle()
+            assertEquals(
+                GemmaInferenceSettings(512, 8, false, 0.7, 1.2, true),
+                preferences.inferenceSettings.value,
+            )
+            assertEquals(
+                GemmaInferenceSettings(512, 8, false, 0.7, 1.2, true),
+                viewModel.state.value.inference,
+            )
+        } finally {
+            viewModel.viewModelScope.cancel()
+            Dispatchers.resetMain()
+        }
+    }
+
     private class FakeStore(
         ready: Set<GemmaModel> = emptySet(),
         statuses: Map<GemmaModel, GemmaModelStatus> = emptyMap(),
@@ -210,10 +257,49 @@ class GemmaModelViewModelTest {
 
     private class FakePreferences : GemmaModelPreferencesStore {
         override val selectedGemmaModel = MutableStateFlow<GemmaModel?>(null)
+        override val inferenceSettings = MutableStateFlow(GemmaInferenceSettings())
         var failWrites = false
         override suspend fun setSelectedGemmaModel(model: GemmaModel) {
             check(!failWrites) { "write_failed" }
             selectedGemmaModel.value = model
+        }
+
+        override suspend fun setMaxOutputToken(value: Int) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(
+                maxOutputToken = GemmaInferenceSettings.clamp(maxOutputToken = value).maxOutputToken,
+            )
+        }
+
+        override suspend fun setTopK(value: Int) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(
+                topK = GemmaInferenceSettings.clamp(topK = value).topK,
+            )
+        }
+
+        override suspend fun setThinkingEnabled(enabled: Boolean) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(thinkingEnabled = enabled)
+        }
+
+        override suspend fun setTopP(value: Double) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(
+                topP = GemmaInferenceSettings.clamp(topP = value).topP,
+            )
+        }
+
+        override suspend fun setTemperature(value: Double) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(
+                temperature = GemmaInferenceSettings.clamp(temperature = value).temperature,
+            )
+        }
+
+        override suspend fun setSpeculativeDecodingEnabled(enabled: Boolean) {
+            check(!failWrites) { "write_failed" }
+            inferenceSettings.value = inferenceSettings.value.copy(speculativeDecodingEnabled = enabled)
         }
     }
 }

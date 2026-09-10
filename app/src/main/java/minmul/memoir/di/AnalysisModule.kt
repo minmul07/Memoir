@@ -46,7 +46,10 @@ object AnalysisModule {
 
     @Provides
     @Singleton
-    fun llmEngine(@ApplicationContext context: Context): GemmaLlmEngine = GemmaLlmEngine(context)
+    fun llmEngine(
+        @ApplicationContext context: Context,
+        preferences: GemmaModelPreferencesStore,
+    ): GemmaLlmEngine = GemmaLlmEngine(context) { preferences.inferenceSettings.first() }
 
     @Provides
     @Singleton

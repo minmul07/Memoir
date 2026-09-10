@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import minmul.memoir.core.ai.AnalysisLog
+import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
 import minmul.memoir.core.model.GemmaModelStatus
@@ -32,10 +33,18 @@ data class GemmaModelManagementState(
     val preferencesLoaded: Boolean = false,
     val preferencesFailed: Boolean = false,
     val savingModels: Set<GemmaModel> = emptySet(),
+    val inference: GemmaInferenceSettings = GemmaInferenceSettings(),
+    val inferenceSaving: Boolean = false,
 )
 
 private data class GemmaSelectionState(
     val selected: GemmaModel? = null,
+    val loaded: Boolean = false,
+    val failed: Boolean = false,
+)
+
+private data class GemmaInferenceState(
+    val settings: GemmaInferenceSettings = GemmaInferenceSettings(),
     val loaded: Boolean = false,
     val failed: Boolean = false,
 )
@@ -49,6 +58,7 @@ class GemmaModelViewModel @Inject constructor(
     private val reload = MutableStateFlow(0)
     private val saving = MutableStateFlow<Set<GemmaModel>>(emptySet())
     private val saveFailed = MutableStateFlow(false)
+    private val inferenceSaving = MutableStateFlow(false)
     private var autoSelectAttempted = false
     private val selection = reload.flatMapLatest {
         preferences.selectedGemmaModel
@@ -59,16 +69,34 @@ class GemmaModelViewModel @Inject constructor(
                 emit(GemmaSelectionState(failed = true))
             }
     }
+    private val inference = reload.flatMapLatest {
+        preferences.inferenceSettings
+            .map { GemmaInferenceState(settings = it, loaded = true) }
+            .onStart { emit(GemmaInferenceState()) }
+            .catch {
+                AnalysisLog.write("models gemma inference preferences_failed error=${it.javaClass.simpleName}")
+                emit(GemmaInferenceState(failed = true))
+            }
+    }
     val state =
-        combine(models.models, selection, saving, saveFailed) { models, selection, saving, failed ->
+        combine(
+            models.models,
+            selection,
+            saving,
+            saveFailed,
+            combine(inference, inferenceSaving) { inference, saving -> inference to saving },
+        ) { models, selection, saving, failed, inference ->
             val ready = models.filter { it.status == GemmaModelStatus.Ready }.map { it.model }
             val selected = selection.selected?.takeIf { it in ready }
+            val (inferenceState, inferenceSaving) = inference
             GemmaModelManagementState(
                 models = models.map { it.copy(selected = it.model == selected) },
                 selected = selected,
-                preferencesLoaded = selection.loaded,
-                preferencesFailed = selection.failed || failed,
+                preferencesLoaded = selection.loaded && inferenceState.loaded,
+                preferencesFailed = selection.failed || failed || inferenceState.failed,
                 savingModels = saving,
+                inference = inferenceState.settings,
+                inferenceSaving = inferenceSaving,
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, GemmaModelManagementState())
     private var refreshJob: Job? = null
@@ -151,6 +179,68 @@ class GemmaModelViewModel @Inject constructor(
                 throw cancelled
             } catch (error: Exception) {
                 AnalysisLog.write("models gemma action=delete_failed model=$model error=${error.javaClass.simpleName}")
+            }
+        }
+    }
+
+    fun setMaxOutputToken(value: Int) {
+        val clamped = GemmaInferenceSettings.clamp(maxOutputToken = value).maxOutputToken
+        setInference("set_max_output_token value=$clamped", state.value.inference.maxOutputToken == clamped) {
+            preferences.setMaxOutputToken(value)
+        }
+    }
+
+    fun setTopK(value: Int) {
+        val clamped = GemmaInferenceSettings.clamp(topK = value).topK
+        setInference("set_top_k value=$clamped", state.value.inference.topK == clamped) {
+            preferences.setTopK(value)
+        }
+    }
+
+    fun setTopP(value: Double) {
+        val clamped = GemmaInferenceSettings.clamp(topP = value).topP
+        setInference("set_top_p value=$clamped", state.value.inference.topP == clamped) {
+            preferences.setTopP(value)
+        }
+    }
+
+    fun setTemperature(value: Double) {
+        val clamped = GemmaInferenceSettings.clamp(temperature = value).temperature
+        setInference("set_temperature value=$clamped", state.value.inference.temperature == clamped) {
+            preferences.setTemperature(value)
+        }
+    }
+
+    fun setThinkingEnabled(enabled: Boolean) {
+        setInference("set_thinking enabled=$enabled", state.value.inference.thinkingEnabled == enabled) {
+            preferences.setThinkingEnabled(enabled)
+        }
+    }
+
+    fun setSpeculativeDecodingEnabled(enabled: Boolean) {
+        setInference(
+            "set_speculative_decoding enabled=$enabled",
+            state.value.inference.speculativeDecodingEnabled == enabled,
+        ) {
+            preferences.setSpeculativeDecodingEnabled(enabled)
+        }
+    }
+
+    private fun setInference(action: String, skip: Boolean, write: suspend () -> Unit) {
+        if (!state.value.preferencesLoaded || inferenceSaving.value || skip) return
+        AnalysisLog.write("models gemma action=$action")
+        inferenceSaving.value = true
+        saveFailed.value = false
+        viewModelScope.launch {
+            try {
+                write()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                AnalysisLog.write("models gemma action=${action}_failed error=${error.javaClass.simpleName}")
+                saveFailed.value = true
+            } finally {
+                inferenceSaving.value = false
             }
         }
     }

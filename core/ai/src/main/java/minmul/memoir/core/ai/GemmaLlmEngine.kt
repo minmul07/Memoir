@@ -7,8 +7,11 @@ import com.google.ai.edge.litertlm.Contents
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.ExperimentalApi
+import com.google.ai.edge.litertlm.ExperimentalFlags
 import com.google.ai.edge.litertlm.Message
 import com.google.ai.edge.litertlm.MessageCallback
+import com.google.ai.edge.litertlm.SamplerConfig
 import com.google.ai.edge.litertlm.ThinkingConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.LlmRuntimeStatus
 import java.io.File
@@ -28,9 +32,14 @@ class GemmaLlmEngine internal constructor(
     private val cacheDir: String,
     private val ioDispatcher: CoroutineDispatcher,
     private val createEngine: (EngineConfig) -> Engine,
+    private val settings: suspend () -> GemmaInferenceSettings = { GemmaInferenceSettings() },
+    private val setSpeculativeDecoding: (Boolean) -> Unit = ::applySpeculativeDecodingFlag,
 ) : LlmEngine {
-    constructor(context: Context, ioDispatcher: CoroutineDispatcher = Dispatchers.IO) :
-            this(context.applicationContext.cacheDir.path, ioDispatcher, ::Engine)
+    constructor(
+        context: Context,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+        settings: suspend () -> GemmaInferenceSettings = { GemmaInferenceSettings() },
+    ) : this(context.applicationContext.cacheDir.path, ioDispatcher, ::Engine, settings)
 
     private val mutex = Mutex()
     private val mutableStatus = MutableStateFlow<LlmRuntimeStatus>(LlmRuntimeStatus.Idle)
@@ -50,6 +59,8 @@ class GemmaLlmEngine internal constructor(
         mutex.withLock {
             releaseNative()
             mutableStatus.value = LlmRuntimeStatus.Loading(model)
+            val inference = settings()
+            setSpeculativeDecoding(inference.speculativeDecodingEnabled)
             val created = createEngine(
                 EngineConfig(
                     modelPath = file.absolutePath,
@@ -77,9 +88,10 @@ class GemmaLlmEngine internal constructor(
 
     override suspend fun summarize(imagePath: String, ocrText: String?): String =
         withContext(ioDispatcher) {
+            val inference = settings()
             mutex.withLock {
                 val current = checkNotNull(engine) { "engine_not_ready" }
-                current.createConversation(CONVERSATION_CONFIG).use { conversation ->
+                current.createConversation(conversationConfig(inference)).use { conversation ->
                     val response = StringBuffer()
                     val finished = CompletableDeferred<String>()
                     conversation.sendMessageAsync(
@@ -139,11 +151,22 @@ class GemmaLlmEngine internal constructor(
     private fun prompt(ocrText: String?): String =
         "$SUMMARY_PROMPT\n${ocrText.orEmpty()}"
 
+    private fun conversationConfig(settings: GemmaInferenceSettings) = ConversationConfig(
+        samplerConfig = SamplerConfig(
+            topK = settings.topK,
+            topP = settings.topP,
+            temperature = settings.temperature,
+        ),
+        thinkingConfig = ThinkingConfig(enableThinking = settings.thinkingEnabled),
+        maxOutputToken = settings.maxOutputToken,
+    )
+
     private companion object {
         const val SUMMARY_PROMPT = "이 이미지와 아래 OCR 텍스트를 한 문단으로 요약하세요."
-        val CONVERSATION_CONFIG = ConversationConfig(
-            thinkingConfig = ThinkingConfig(enableThinking = false),
-            maxOutputToken = 1024,
-        )
     }
+}
+
+@OptIn(ExperimentalApi::class)
+private fun applySpeculativeDecodingFlag(enabled: Boolean) {
+    ExperimentalFlags.enableSpeculativeDecoding = enabled
 }

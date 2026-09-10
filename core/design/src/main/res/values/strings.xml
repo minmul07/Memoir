@@ -77,6 +77,14 @@
     <string name="gemma_model_cancel_named">%1$s 모델 다운로드 취소</string>
     <string name="gemma_model_delete_named">%1$s 모델 삭제</string>
     <string name="gemma_model_delete_confirmation">다운로드한 모델 파일을 삭제합니다. 다시 쓰려면 새로 받아야 합니다.</string>
+    <string name="gemma_max_output_tokens">최대 출력 토큰</string>
+    <string name="gemma_top_k">top-k</string>
+    <string name="gemma_top_p">top-p</string>
+    <string name="gemma_temperature">temperature</string>
+    <string name="gemma_thinking">Thinking 활성화</string>
+    <string name="gemma_thinking_description">추론 과정도 최대 출력 토큰에 포함됩니다. 다음 항목부터 적용됩니다.</string>
+    <string name="gemma_speculative_decoding">Speculative decoding 활성화</string>
+    <string name="gemma_speculative_decoding_description">다음 분석 시작부터 적용됩니다. 모델이 지원하지 않으면 로드가 실패할 수 있습니다.</string>
     <string name="model_section_ocr">OCR</string>
     <string name="model_mlkit_text_recognition_v2">ML Kit Text Recognition v2</string>
     <string name="model_section_embedding">임베딩</string>

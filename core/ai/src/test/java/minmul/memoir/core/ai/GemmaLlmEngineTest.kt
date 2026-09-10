@@ -2,6 +2,7 @@ package minmul.memoir.core.ai
 
 import com.google.ai.edge.litertlm.Contents
 import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.Message
 import com.google.ai.edge.litertlm.MessageCallback
@@ -23,6 +24,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.LlmRuntimeStatus
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,12 +38,23 @@ class GemmaLlmEngineTest {
     private val native = mockk<Engine>(relaxed = true)
     private val conversation = mockk<Conversation>(relaxed = true)
     private val callback = slot<MessageCallback>()
+    private val config = slot<ConversationConfig>()
 
-    private fun engine(scope: TestScope): GemmaLlmEngine {
+    private fun engine(
+        scope: TestScope,
+        settings: suspend () -> GemmaInferenceSettings = { GemmaInferenceSettings() },
+        setSpeculativeDecoding: (Boolean) -> Unit = {},
+    ): GemmaLlmEngine {
         every { native.isInitialized() } returns true
-        every { native.createConversation(any()) } returns conversation
+        every { native.createConversation(capture(config)) } returns conversation
         every { conversation.sendMessageAsync(any<Contents>(), capture(callback)) } just Runs
-        return GemmaLlmEngine("cache", StandardTestDispatcher(scope.testScheduler)) { native }
+        return GemmaLlmEngine(
+            "cache",
+            StandardTestDispatcher(scope.testScheduler),
+            { native },
+            settings,
+            setSpeculativeDecoding,
+        )
     }
 
     @Test
@@ -121,4 +134,48 @@ class GemmaLlmEngineTest {
             verify(exactly = 0) { conversation.cancelProcess() }
             engine.close()
         }
+
+    @Test
+    fun `summarize passes stored conversation settings`() = runTest {
+        val engine = engine(
+            this,
+            settings = {
+                GemmaInferenceSettings(
+                    maxOutputToken = 2048,
+                    topK = 16,
+                    thinkingEnabled = true,
+                    topP = 0.8,
+                    temperature = 0.5,
+                )
+            },
+        )
+        engine.load(GemmaModel.E2B, File("model"))
+        val task = async { engine.summarize("/image", null) }
+        runCurrent()
+        callback.captured.onDone()
+        task.await()
+        assertEquals(2048, config.captured.maxOutputToken)
+        assertEquals(16, config.captured.samplerConfig?.topK)
+        assertEquals(0.8, config.captured.samplerConfig?.topP)
+        assertEquals(0.5, config.captured.samplerConfig?.temperature)
+        assertEquals(true, config.captured.thinkingConfig?.enableThinking)
+        engine.close()
+    }
+
+    @Test
+    fun `load applies speculative decoding before initialize`() = runTest {
+        val flags = mutableListOf<Boolean>()
+        val engine = engine(
+            this,
+            settings = { GemmaInferenceSettings(speculativeDecodingEnabled = false) },
+            setSpeculativeDecoding = { flags += it },
+        )
+        every { native.initialize() } answers {
+            assertEquals(listOf(false), flags)
+        }
+        engine.load(GemmaModel.E2B, File("model"))
+        assertEquals(listOf(false), flags)
+        verify(exactly = 1) { native.initialize() }
+        engine.close()
+    }
 }
