@@ -1,5 +1,12 @@
 package minmul.memoir.feature.queue
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -18,11 +26,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
@@ -33,6 +49,7 @@ import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
 import minmul.memoir.core.model.LlmRuntimeStatus
 import minmul.memoir.core.model.QueueItem
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun WorkQueueScreen(
@@ -49,6 +66,24 @@ fun WorkQueueScreen(
     llmStatus: LlmRuntimeStatus = LlmRuntimeStatus.Idle,
 ) {
     val llmStatusText = llmRuntimeStatusText(llmStatus)
+    val analyzingText = stringResource(R.string.queue_running)
+    var showAnalyzingAfterReady by remember { mutableStateOf(false) }
+    LaunchedEffect(llmStatus) {
+        if (llmStatus is LlmRuntimeStatus.Ready) {
+            showAnalyzingAfterReady = false
+            delay(3_000.milliseconds)
+            showAnalyzingAfterReady = true
+        } else {
+            showAnalyzingAfterReady = false
+        }
+    }
+    val statusCardText = if (llmStatus is LlmRuntimeStatus.Ready && showAnalyzingAfterReady) {
+        analyzingText
+    } else {
+        llmStatusText
+    }
+    val motionScheme = MaterialTheme.motionScheme
+    val textSlidePx = with(LocalDensity.current) { 40.dp.roundToPx() }
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -60,6 +95,34 @@ fun WorkQueueScreen(
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(vertical = 16.dp),
             )
+            AnimatedVisibility(statusCardText != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    AnimatedContent(
+                        targetState = statusCardText.orEmpty(),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                            .clipToBounds(),
+                        transitionSpec = {
+                            slideInHorizontally(
+                                animationSpec = motionScheme.defaultSpatialSpec(),
+                                initialOffsetX = { textSlidePx },
+                            ) + fadeIn(animationSpec = motionScheme.defaultEffectsSpec()) togetherWith
+                                    slideOutHorizontally(
+                                        animationSpec = motionScheme.defaultSpatialSpec(),
+                                        targetOffsetX = { -textSlidePx },
+                                    ) + fadeOut(animationSpec = motionScheme.defaultEffectsSpec())
+                        },
+                        label = "llm-status-text",
+                    ) { text ->
+                        Text(text = text)
+                    }
+                }
+            }
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -95,7 +158,6 @@ fun WorkQueueScreen(
             }
             if (actionFailed) Text(stringResource(R.string.content_action_failed))
             if (serviceFailed) Text(stringResource(R.string.analysis_service_failed))
-            if (llmStatusText != null) Text(llmStatusText)
             TextButton(onClick = onOpenHistory, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.nav_analysis_history))
             }
