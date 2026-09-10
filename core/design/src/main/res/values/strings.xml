@@ -90,11 +90,8 @@
     <string name="model_section_embedding">임베딩</string>
     <string name="model_embedding_gemma">EmbeddingGemma</string>
 
-    <string name="preview_title">Title Text</string>
-    <string name="preview_description">Short description text</string>
-    <string name="preview_value">Value Text</string>
-    <string name="preview_section_title">Section Title</string>
-    <string name="preview_item_id">Title Text</string>
+    <string name="preview_ocr_text">내일 오전 10시 회의. 자료는 공유 폴더에 올려 주세요.</string>
+    <string name="preview_analysis_payload">일정: 내일 오전 10시 회의\n할 일: 자료를 공유 폴더에 업로드</string>
     <string name="image_preview_failed">미리보기를 불러올 수 없습니다</string>
     <string name="queue_item_count">작업 대기열 · %1$d개</string>
     <string name="queue_empty">대기 중인 이미지가 없습니다</string>

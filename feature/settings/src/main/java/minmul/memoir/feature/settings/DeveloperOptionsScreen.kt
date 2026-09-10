@@ -1,10 +1,18 @@
 package minmul.memoir.feature.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import minmul.memoir.core.design.R
@@ -19,20 +27,19 @@ fun DeveloperOptionsScreen(
     busy: Boolean = false,
     failed: Boolean = false,
 ) {
-    val preview = LocalInspectionMode.current
     var deletion by remember { mutableStateOf<Int?>(null) }
     Column(modifier.fillMaxSize()) {
         ListItem(onClick = onResetOnboarding) {
-            Text(if (preview) "…" else stringResource(R.string.developer_reset_onboarding))
+            Text(stringResource(R.string.developer_reset_onboarding))
         }
         ListItem(onClick = { if (!busy) deletion = R.string.developer_delete_queue }) {
-            Text(if (preview) "…" else stringResource(R.string.developer_delete_queue))
+            Text(stringResource(R.string.developer_delete_queue))
         }
         ListItem(onClick = { if (!busy) deletion = R.string.developer_delete_items }) {
-            Text(if (preview) "…" else stringResource(R.string.developer_delete_items))
+            Text(stringResource(R.string.developer_delete_items))
         }
         if (busy) CircularProgressIndicator()
-        if (failed) Text(if (preview) "…" else stringResource(R.string.content_action_failed))
+        if (failed) Text(stringResource(R.string.content_action_failed))
     }
     deletion?.let { title ->
         AlertDialog(

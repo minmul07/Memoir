@@ -20,7 +20,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +28,8 @@ import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
 import minmul.memoir.core.design.llmRuntimeStatusText
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.model.GemmaModel
+import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
 import minmul.memoir.core.model.LlmRuntimeStatus
 import minmul.memoir.core.model.QueueItem
@@ -47,7 +48,6 @@ fun WorkQueueScreen(
     serviceFailed: Boolean = false,
     llmStatus: LlmRuntimeStatus = LlmRuntimeStatus.Idle,
 ) {
-    val preview = LocalInspectionMode.current
     val llmStatusText = llmRuntimeStatusText(llmStatus)
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -56,7 +56,7 @@ fun WorkQueueScreen(
                 .padding(horizontal = 16.dp),
         ) {
             Text(
-                text = if (preview) "…" else stringResource(R.string.queue_item_count, items.size),
+                text = stringResource(R.string.queue_item_count, items.size),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(vertical = 16.dp),
             )
@@ -67,24 +67,19 @@ fun WorkQueueScreen(
             ) {
                 when {
                     isLoading -> item { CircularProgressIndicator() }
-                    failed -> item { Text(if (preview) "…" else stringResource(R.string.queue_load_failed)) }
-                    items.isEmpty() -> item { Text(if (preview) "…" else stringResource(R.string.queue_empty)) }
+                    failed -> item { Text(stringResource(R.string.queue_load_failed)) }
+                    items.isEmpty() -> item { Text(stringResource(R.string.queue_empty)) }
                 }
                 itemsIndexed(items, key = { _, item -> item.jobId }) { index, item ->
                     ListItem(
                         onClick = { onOpenItem(item.itemId) },
                         trailingContent = {
                             TextButton(onClick = { onCancel(item.jobId) }) {
-                                Text(if (preview) "…" else stringResource(R.string.action_cancel))
+                                Text(stringResource(R.string.action_cancel))
                             }
                         },
                         content = {
-                            Text(
-                                if (preview) "…" else stringResource(
-                                    R.string.queue_image_number,
-                                    index + 1
-                                )
-                            )
+                            Text(stringResource(R.string.queue_image_number, index + 1))
                         },
                         supportingContent = {
                             Text(analysisStatusText(item.status, item.stage, item.attemptCount))
@@ -102,7 +97,7 @@ fun WorkQueueScreen(
             if (serviceFailed) Text(stringResource(R.string.analysis_service_failed))
             if (llmStatusText != null) Text(llmStatusText)
             TextButton(onClick = onOpenHistory, modifier = Modifier.fillMaxWidth()) {
-                Text(if (preview) "…" else stringResource(R.string.nav_analysis_history))
+                Text(stringResource(R.string.nav_analysis_history))
             }
         }
         if (items.isNotEmpty()) {
@@ -114,7 +109,7 @@ fun WorkQueueScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = if (preview) "…" else stringResource(R.string.analysis_restart),
+                    contentDescription = stringResource(R.string.analysis_restart),
                 )
             }
         }
@@ -126,10 +121,14 @@ fun WorkQueueScreen(
 private fun WorkQueueScreenPreview() {
     MemoirTheme {
         WorkQueueScreen(
-            items = listOf(QueueItem("1", "1", "preview", JobStatus.Queued)),
+            items = listOf(
+                QueueItem("1", "1", "preview", JobStatus.Running, JobStage.Ocr),
+                QueueItem("2", "2", "preview", JobStatus.Queued),
+            ),
             isLoading = false,
             failed = false,
             onOpenHistory = {},
+            llmStatus = LlmRuntimeStatus.Ready(GemmaModel.E4B),
         )
     }
 }

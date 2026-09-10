@@ -1,7 +1,6 @@
 package minmul.memoir.core.design
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.JobStage
@@ -10,7 +9,6 @@ import minmul.memoir.core.model.LlmRuntimeStatus
 
 @Composable
 fun analysisStatusText(status: JobStatus?, stage: JobStage = JobStage.Waiting, attemptCount: Int = 0): String {
-    if (LocalInspectionMode.current) return "…"
     return stringResource(when {
         status == null -> R.string.analysis_unqueued
         status == JobStatus.Succeeded -> R.string.history_filter_completed
@@ -29,9 +27,6 @@ fun analysisStatusText(status: JobStatus?, stage: JobStage = JobStage.Waiting, a
 
 @Composable
 fun llmRuntimeStatusText(status: LlmRuntimeStatus): String? {
-    val preview = LocalInspectionMode.current
-    if (status is LlmRuntimeStatus.Idle) return null
-    if (preview) return "…"
     return when (status) {
         LlmRuntimeStatus.Idle -> null
         LlmRuntimeStatus.Missing -> stringResource(R.string.llm_status_missing)
