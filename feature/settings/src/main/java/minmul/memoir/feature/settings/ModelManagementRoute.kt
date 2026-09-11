@@ -9,19 +9,42 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun ModelManagementRoute(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: OcrModelViewModel = hiltViewModel(),
+    ocrViewModel: OcrModelViewModel = hiltViewModel(),
+    gemmaViewModel: GemmaModelViewModel = hiltViewModel(),
 ) {
-    val modelState by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel) { viewModel.refresh() }
+    val ocrState by ocrViewModel.state.collectAsStateWithLifecycle()
+    val gemmaState by gemmaViewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(ocrViewModel, gemmaViewModel) {
+        ocrViewModel.refresh()
+        gemmaViewModel.refresh()
+    }
     ModelManagementScreen(
+        onBack = onBack,
         modifier = modifier,
-        ocrModels = modelState.models,
-        preferencesLoaded = modelState.preferencesLoaded,
-        preferencesFailed = modelState.preferencesFailed,
-        savingModels = modelState.savingModels,
-        onOcrEnabledChange = viewModel::setEnabled,
-        onInstallOcr = viewModel::install,
-        onRefreshOcr = viewModel::refresh,
+        gemmaModels = gemmaState.models,
+        onInstallGemma = gemmaViewModel::install,
+        onCancelGemma = gemmaViewModel::cancel,
+        onSelectGemma = gemmaViewModel::select,
+        onDeleteGemma = gemmaViewModel::delete,
+        gemmaPreferencesLoaded = gemmaState.preferencesLoaded,
+        gemmaPreferencesFailed = gemmaState.preferencesFailed,
+        gemmaSavingModels = gemmaState.savingModels,
+        inference = gemmaState.inference,
+        inferenceSaving = gemmaState.inferenceSaving,
+        onMaxOutputTokenChange = gemmaViewModel::setMaxOutputToken,
+        onTopKChange = gemmaViewModel::setTopK,
+        onTopPChange = gemmaViewModel::setTopP,
+        onTemperatureChange = gemmaViewModel::setTemperature,
+        onThinkingEnabledChange = gemmaViewModel::setThinkingEnabled,
+        onSpeculativeDecodingChange = gemmaViewModel::setSpeculativeDecodingEnabled,
+        ocrModels = ocrState.models,
+        preferencesLoaded = ocrState.preferencesLoaded,
+        preferencesFailed = ocrState.preferencesFailed,
+        savingModels = ocrState.savingModels,
+        onOcrEnabledChange = ocrViewModel::setEnabled,
+        onInstallOcr = ocrViewModel::install,
+        onRefreshOcr = ocrViewModel::refresh,
     )
 }

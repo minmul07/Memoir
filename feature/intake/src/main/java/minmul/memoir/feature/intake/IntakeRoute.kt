@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import minmul.memoir.core.model.ItemSource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -21,10 +22,11 @@ fun IntakeRoute(
     onOpenQueue: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    source: ItemSource = ItemSource.Share,
     viewModel: IntakeViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(viewModel) {
-        viewModel.start(imageUris)
+        viewModel.start(imageUris, source)
     }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(uiState) {

@@ -3,7 +3,6 @@ plugins {
 }
 
 android {
-    buildFeatures { buildConfig = true }
     namespace = "minmul.memoir.core.ai"
     compileSdk {
         version = release(37)
@@ -28,6 +27,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.core.model)
+    implementation(libs.litertlm.android)
+    implementation(libs.timber)
     implementation(libs.play.ai.delivery)
     implementation(libs.play.services.base)
     implementation(libs.play.services.mlkit.text.recognition)

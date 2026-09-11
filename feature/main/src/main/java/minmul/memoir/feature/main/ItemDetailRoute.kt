@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun ItemDetailRoute(
     itemId: String,
+    onBack: () -> Unit,
     onDeleted: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ItemDetailViewModel = hiltViewModel(),
@@ -20,6 +21,7 @@ fun ItemDetailRoute(
     LaunchedEffect(itemId) { viewModel.load(itemId) }
     ItemDetailScreen(
         itemId = itemId,
+        onBack = onBack,
         item = state.item,
         loading = state.loading,
         failed = state.failed || actionFailed,

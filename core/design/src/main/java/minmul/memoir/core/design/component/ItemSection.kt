@@ -242,8 +242,8 @@ private fun ToggleItemPreview() {
     var checked by remember { mutableStateOf(true) }
     MemoirTheme {
         ToggleItem(
-            title = stringResource(R.string.preview_title),
-            description = stringResource(R.string.preview_description),
+            title = stringResource(R.string.gemma_thinking),
+            description = stringResource(R.string.gemma_thinking_description),
             checked = checked,
             onCheckedChange = { checked = it },
         )
@@ -256,8 +256,8 @@ private fun CheckboxItemPreview() {
     var checked by remember { mutableStateOf(false) }
     MemoirTheme {
         CheckboxItem(
-            title = stringResource(R.string.preview_title),
-            description = stringResource(R.string.preview_description),
+            title = stringResource(R.string.ocr_model_korean),
+            description = stringResource(R.string.ocr_model_enabled),
             checked = checked,
             onCheckedChange = { checked = it },
         )
@@ -269,8 +269,7 @@ private fun CheckboxItemPreview() {
 private fun NavigationItemPreview() {
     MemoirTheme {
         NavigationItem(
-            title = stringResource(R.string.preview_title),
-            description = stringResource(R.string.preview_description),
+            title = stringResource(R.string.nav_model_management),
             onClick = {},
         )
     }
@@ -281,9 +280,8 @@ private fun NavigationItemPreview() {
 private fun DialogItemPreview() {
     MemoirTheme {
         DialogItem(
-            title = stringResource(R.string.preview_title),
-            description = stringResource(R.string.preview_description),
-            value = stringResource(R.string.preview_value),
+            title = stringResource(R.string.settings_analysis_mode),
+            value = stringResource(R.string.settings_manual_analysis),
             onClick = {},
         )
     }
@@ -295,8 +293,7 @@ private fun SliderItemPreview() {
     var value by remember { mutableFloatStateOf(0.5f) }
     MemoirTheme {
         SliderItem(
-            title = stringResource(R.string.preview_title),
-            description = stringResource(R.string.preview_description),
+            title = stringResource(R.string.gemma_temperature),
             value = value,
             onValueChange = { value = it },
         )
@@ -310,29 +307,29 @@ private fun ItemSectionPreview() {
     var checked by remember { mutableStateOf(false) }
     var slider by remember { mutableFloatStateOf(0.5f) }
     MemoirTheme {
-        ItemSection(title = stringResource(R.string.preview_section_title)) {
+        ItemSection(title = stringResource(R.string.settings_section_model)) {
             ToggleItem(
-                title = stringResource(R.string.preview_title),
-                description = stringResource(R.string.preview_description),
+                title = stringResource(R.string.gemma_thinking),
+                description = stringResource(R.string.gemma_thinking_description),
                 checked = toggled,
                 onCheckedChange = { toggled = it },
             )
             CheckboxItem(
-                title = stringResource(R.string.preview_title),
+                title = stringResource(R.string.ocr_model_korean),
                 checked = checked,
                 onCheckedChange = { checked = it },
             )
             NavigationItem(
-                title = stringResource(R.string.preview_title),
+                title = stringResource(R.string.nav_model_management),
                 onClick = {},
             )
             DialogItem(
-                title = stringResource(R.string.preview_title),
-                value = stringResource(R.string.preview_value),
+                title = stringResource(R.string.settings_analysis_mode),
+                value = stringResource(R.string.settings_manual_analysis),
                 onClick = {},
             )
             SliderItem(
-                title = stringResource(R.string.preview_title),
+                title = stringResource(R.string.gemma_temperature),
                 value = slider,
                 onValueChange = { slider = it },
             )

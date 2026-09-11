@@ -17,12 +17,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.model.AnalysisQueueMode
 import minmul.memoir.data.content.ContentRepository
+import minmul.memoir.data.preferences.AnalysisQueueModeStore
 import minmul.memoir.navigation.RootNavDisplay
 import javax.inject.Inject
 
@@ -30,6 +33,9 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var contentRepository: ContentRepository
+
+    @Inject
+    lateinit var analysisQueueModeStore: AnalysisQueueModeStore
     private var notificationRequested = false
     private val notificationPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -42,12 +48,17 @@ class MainActivity : ComponentActivity() {
         notificationRequested = savedInstanceState?.getBoolean("notificationRequested") ?: false
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                contentRepository.observeQueue().map { it.isNotEmpty() }.distinctUntilChanged().catch { emit(false) }.collect { hasWork ->
-                    if (hasWork) {
-                        requestAnalysisNotifications()
-                        AnalysisService.start(this@MainActivity)
+                combine(
+                    contentRepository.observeQueue().map { it.isNotEmpty() }.catch { emit(false) },
+                    analysisQueueModeStore.analysisQueueMode.catch { emit(AnalysisQueueMode.Manual) },
+                ) { hasWork, mode -> hasWork && mode.startsAutomatically }
+                    .distinctUntilChanged()
+                    .collect { shouldStart ->
+                        if (shouldStart) {
+                            requestAnalysisNotifications()
+                            AnalysisService.start(this@MainActivity)
+                        }
                     }
-                }
             }
         }
         enableEdgeToEdge()

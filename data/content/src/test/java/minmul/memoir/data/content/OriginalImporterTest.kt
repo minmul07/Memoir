@@ -56,7 +56,8 @@ class OriginalImporterTest {
             encoder = RecordingEncoder(),
         )
 
-        val error = runCatching { importer.import("item-1", "content://images/1") }.exceptionOrNull()
+        val error =
+            runCatching { importer.import("item-1", "content://images/1") }.exceptionOrNull()
 
         assertTrue(error is IllegalStateException)
         assertFalse(File(filesDir, "items/item-1").exists())
@@ -70,7 +71,8 @@ class OriginalImporterTest {
             encoder = ImageJpegEncoder { _, _ -> throw IOException("encode failed") },
         )
 
-        val error = runCatching { importer.import("item-1", "content://images/1") }.exceptionOrNull()
+        val error =
+            runCatching { importer.import("item-1", "content://images/1") }.exceptionOrNull()
 
         assertTrue(error is IOException)
         assertFalse(File(filesDir, "items/item-1").exists())

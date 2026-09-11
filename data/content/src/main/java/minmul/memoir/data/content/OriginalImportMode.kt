@@ -21,7 +21,8 @@ enum class OriginalImportMode {
                 "image/heic",
                 "image/hevc",
                 "video/hevc",
-                -> ReencodeJpeg
+                    -> ReencodeJpeg
+
                 else -> Unsupported
             }
         }

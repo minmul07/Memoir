@@ -10,7 +10,7 @@ data object Onboarding : NavKey
 data object Main : NavKey
 
 @Serializable
-data object Archive : NavKey
+data object Settings : NavKey
 
 @Serializable
 data object AnalysisHistory : NavKey

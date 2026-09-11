@@ -25,7 +25,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AnalysisService : Service() {
-    @Inject lateinit var runner: AnalysisRunner
+    @Inject
+    lateinit var runner: AnalysisRunner
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var work: Job? = null
     private var latestStartId = 0
@@ -38,8 +39,12 @@ class AnalysisService : Service() {
         requests++
         AnalysisLog.write("service start id=$startId requests=$requests active=${work != null}")
         val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel(CHANNEL,
-            getString(R.string.analysis_channel), NotificationManager.IMPORTANCE_LOW))
+        manager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL,
+                getString(R.string.analysis_channel), NotificationManager.IMPORTANCE_LOW
+            )
+        )
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
         val notification = Notification.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
@@ -48,9 +53,12 @@ class AnalysisService : Service() {
             .setProgress(0, 0, true)
             .setOngoing(true)
             .apply {
-                if (launchIntent != null) setContentIntent(PendingIntent.getActivity(
-                    this@AnalysisService, 0, launchIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                if (launchIntent != null) setContentIntent(
+                    PendingIntent.getActivity(
+                        this@AnalysisService, 0, launchIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                )
             }.build()
         try {
             val type = if (Build.VERSION.SDK_INT >= 35)

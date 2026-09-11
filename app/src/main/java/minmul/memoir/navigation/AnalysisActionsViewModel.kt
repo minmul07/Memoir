@@ -7,15 +7,20 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import minmul.memoir.core.ai.LlmEngine
 import minmul.memoir.data.content.AnalysisRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class AnalysisActionsViewModel @Inject constructor(private val repository: AnalysisRepository) : ViewModel() {
+class AnalysisActionsViewModel @Inject constructor(
+    private val repository: AnalysisRepository,
+    llm: LlmEngine,
+) : ViewModel() {
     private val mutableBusy = MutableStateFlow(false)
     val busy = mutableBusy.asStateFlow()
     private val mutableFailed = MutableStateFlow(false)
     val failed = mutableFailed.asStateFlow()
+    val llmStatus = llm.status
 
     fun deleteQueue() = perform { repository.deleteQueue() }
     fun deleteAllItems() = perform { repository.deleteAllItems() }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import minmul.memoir.core.ai.AnalysisLog
 import minmul.memoir.core.ai.OcrModelManager
 import minmul.memoir.core.model.OcrModel
 import minmul.memoir.core.model.OcrModelState
@@ -49,7 +50,10 @@ class OcrModelViewModel @Inject constructor(
         preferences.disabledOcrModels
             .map { OcrSelectionState(disabled = it, loaded = true) }
             .onStart { emit(OcrSelectionState()) }
-            .catch { emit(OcrSelectionState(failed = true)) }
+            .catch {
+                AnalysisLog.write("models ocr preferences_failed error=${it.javaClass.simpleName}")
+                emit(OcrSelectionState(failed = true))
+            }
     }
     val state =
         combine(models.models, selection, saving, saveFailed) { models, selection, saving, failed ->
@@ -64,6 +68,7 @@ class OcrModelViewModel @Inject constructor(
 
     fun refresh() {
         if (refreshJob?.isActive == true) return
+        AnalysisLog.write("models ocr action=refresh")
         reload.update { it + 1 }
         refreshJob = viewModelScope.launch { models.refresh() }
     }
@@ -71,6 +76,7 @@ class OcrModelViewModel @Inject constructor(
     fun setEnabled(model: OcrModel, enabled: Boolean) {
         if (!state.value.preferencesLoaded || model in saving.value) return
         if (state.value.models.none { it.model == model && it.status == OcrModelStatus.Ready }) return
+        AnalysisLog.write("models ocr action=enable model=$model enabled=$enabled")
         saving.update { it + model }
         saveFailed.value = false
         viewModelScope.launch {
@@ -78,7 +84,10 @@ class OcrModelViewModel @Inject constructor(
                 preferences.setOcrModelEnabled(model, enabled)
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                AnalysisLog.write(
+                    "models ocr action=enable_failed model=$model error=${error.javaClass.simpleName}",
+                )
                 saveFailed.value = true
             } finally {
                 saving.update { it - model }
@@ -87,6 +96,7 @@ class OcrModelViewModel @Inject constructor(
     }
 
     fun install(model: OcrModel) {
+        AnalysisLog.write("models ocr action=install model=$model")
         viewModelScope.launch {
             try {
                 models.install(model)

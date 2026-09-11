@@ -16,14 +16,17 @@ fun OnboardingRoute(
             onContinue = { onAdvance(OnboardingProgress.CRASHLYTICS) },
             modifier = modifier,
         )
+
         OnboardingProgress.CRASHLYTICS -> OnboardingCrashlyticsRequestScreen(
             onContinue = { onAdvance(OnboardingProgress.MODEL_SETUP) },
             modifier = modifier,
         )
+
         OnboardingProgress.MODEL_SETUP -> OnboardingModelSetupPage(
             onComplete = onComplete,
             modifier = modifier,
         )
+
         else -> LandingScreen(
             onContinue = { onAdvance(OnboardingProgress.PERMISSION) },
             modifier = modifier,

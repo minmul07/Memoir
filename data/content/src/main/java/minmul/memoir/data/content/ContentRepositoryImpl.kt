@@ -1,7 +1,6 @@
 package minmul.memoir.data.content
 
 import android.content.Context
-import android.util.Log
 import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -20,6 +19,7 @@ import minmul.memoir.core.storage.ItemEntity
 import minmul.memoir.core.storage.ItemJobWrite
 import minmul.memoir.core.storage.MemoirDatabase
 import minmul.memoir.core.storage.OriginalFileStore
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -113,10 +113,10 @@ class ContentRepositoryImpl @Inject constructor(
                 discardOriginals(itemIds)
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (_: Exception) {
+            } catch (error: Exception) {
                 // Intake cancellation cleanup must not crash the application.
                 // Explicit item deletion uses the suspending API and reports failure to the UI.
-                Log.w("Memoir", "Could not discard temporary originals")
+                Timber.w("Could not discard temporary originals error=${error.javaClass.simpleName}")
             }
         }
     }

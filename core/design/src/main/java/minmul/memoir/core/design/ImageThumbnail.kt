@@ -1,11 +1,12 @@
 package minmul.memoir.core.design
 
 import android.graphics.ImageDecoder
-import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,11 +22,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import java.io.File
-import kotlin.coroutines.cancellation.CancellationException
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.core.net.toUri
+import java.io.File
+import kotlin.coroutines.cancellation.CancellationException
 
 private val thumbnailDispatcher = Dispatchers.IO.limitedParallelism(2)
 
@@ -66,13 +67,19 @@ fun ImageThumbnail(
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         val image = bitmap
         when {
-            preview -> Text("…")
+            preview -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainer),
+            )
+
             image != null -> Image(
                 bitmap = image,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
+
             failed -> Text(stringResource(R.string.image_preview_failed))
             else -> CircularProgressIndicator()
         }

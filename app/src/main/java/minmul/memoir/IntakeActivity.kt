@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.feature.intake.IntakeRoute
+import minmul.memoir.intake.IntakeIntents
 import minmul.memoir.intake.ShareImageParser
 
 @AndroidEntryPoint
@@ -16,10 +17,12 @@ class IntakeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val imageUris = ShareImageParser.parse(intent)
+        val source = IntakeIntents.itemSource(intent)
         setContent {
             MemoirTheme {
                 IntakeRoute(
                     imageUris = imageUris,
+                    source = source,
                     onOpenOnboarding = { openMain(openQueue = false) },
                     onOpenQueue = { openMain(openQueue = true) },
                     onFinish = { finish() },

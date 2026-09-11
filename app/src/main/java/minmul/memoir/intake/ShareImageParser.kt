@@ -40,9 +40,11 @@ object ShareImageParser {
             Intent.ACTION_SEND -> {
                 listOfNotNull(extraStream).ifEmpty { clipDataUris.take(1) }
             }
+
             Intent.ACTION_SEND_MULTIPLE -> {
                 extraStreams.ifEmpty { clipDataUris }
             }
+
             else -> emptyList()
         }
         return uris.filter { it.isNotBlank() }.distinct()

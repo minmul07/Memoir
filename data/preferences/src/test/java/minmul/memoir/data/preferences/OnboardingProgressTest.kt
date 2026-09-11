@@ -8,9 +8,18 @@ import org.junit.jupiter.api.Test
 class OnboardingProgressTest {
     @Test
     fun `normalize resets progress before model setup to landing`() {
-        assertEquals(OnboardingProgress.LANDING, OnboardingProgress.normalize(OnboardingProgress.LANDING))
-        assertEquals(OnboardingProgress.LANDING, OnboardingProgress.normalize(OnboardingProgress.PERMISSION))
-        assertEquals(OnboardingProgress.LANDING, OnboardingProgress.normalize(OnboardingProgress.CRASHLYTICS))
+        assertEquals(
+            OnboardingProgress.LANDING,
+            OnboardingProgress.normalize(OnboardingProgress.LANDING)
+        )
+        assertEquals(
+            OnboardingProgress.LANDING,
+            OnboardingProgress.normalize(OnboardingProgress.PERMISSION)
+        )
+        assertEquals(
+            OnboardingProgress.LANDING,
+            OnboardingProgress.normalize(OnboardingProgress.CRASHLYTICS)
+        )
     }
 
     @Test
