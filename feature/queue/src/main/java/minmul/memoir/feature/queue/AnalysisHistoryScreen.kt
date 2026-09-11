@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
+import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.JobStatus
 import minmul.memoir.core.model.QueueItem
@@ -31,6 +32,7 @@ import minmul.memoir.core.model.QueueItem
 @Composable
 fun AnalysisHistoryScreen(
     onOpenItem: (String) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     items: List<QueueItem> = emptyList(),
     loading: Boolean = false,
@@ -38,7 +40,12 @@ fun AnalysisHistoryScreen(
 ) {
     var filter by rememberSaveable { mutableStateOf<JobStatus?>(null) }
     val filtered = items.filter { filter == null || it.status == filter }
-    Column(modifier.fillMaxSize()) {
+    StackScaffold(
+        title = stringResource(R.string.nav_analysis_history),
+        onBack = onBack,
+        modifier = modifier,
+    ) { contentModifier ->
+        Column(contentModifier.fillMaxSize()) {
         Row(
             Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -68,6 +75,7 @@ fun AnalysisHistoryScreen(
             }
         }
     }
+    }
 }
 
 @Preview(showBackground = true)
@@ -76,6 +84,7 @@ private fun AnalysisHistoryScreenPreview() {
     MemoirTheme {
         AnalysisHistoryScreen(
             onOpenItem = {},
+            onBack = {},
             items = listOf(
                 QueueItem("1", "1", "preview", JobStatus.Succeeded),
                 QueueItem("2", "2", "preview", JobStatus.Failed),

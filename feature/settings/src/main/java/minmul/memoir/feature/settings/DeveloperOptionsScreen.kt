@@ -16,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import minmul.memoir.core.design.R
+import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
 
 @Composable
 fun DeveloperOptionsScreen(
+    onBack: () -> Unit,
     onResetOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteQueue: () -> Unit = {},
@@ -28,7 +30,12 @@ fun DeveloperOptionsScreen(
     failed: Boolean = false,
 ) {
     var deletion by remember { mutableStateOf<Int?>(null) }
-    Column(modifier.fillMaxSize()) {
+    StackScaffold(
+        title = stringResource(R.string.nav_developer_options),
+        onBack = onBack,
+        modifier = modifier,
+    ) { contentModifier ->
+        Column(contentModifier.fillMaxSize()) {
         ListItem(onClick = onResetOnboarding) {
             Text(stringResource(R.string.developer_reset_onboarding))
         }
@@ -40,6 +47,7 @@ fun DeveloperOptionsScreen(
         }
         if (busy) CircularProgressIndicator()
         if (failed) Text(stringResource(R.string.content_action_failed))
+    }
     }
     deletion?.let { title ->
         AlertDialog(
@@ -71,5 +79,5 @@ fun DeveloperOptionsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun DeveloperOptionsScreenPreview() {
-    MemoirTheme { DeveloperOptionsScreen(onResetOnboarding = {}) }
+    MemoirTheme { DeveloperOptionsScreen(onBack = {}, onResetOnboarding = {}) }
 }

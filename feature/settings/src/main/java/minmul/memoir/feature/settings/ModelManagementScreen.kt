@@ -35,6 +35,7 @@ import minmul.memoir.core.design.R
 import minmul.memoir.core.design.component.DialogItem
 import minmul.memoir.core.design.component.ItemSection
 import minmul.memoir.core.design.component.NavigationItem
+import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.component.ToggleItem
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.GemmaInferenceSettings
@@ -48,6 +49,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ModelManagementScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     gemmaModels: List<GemmaModelState> = GemmaModel.entries.map { GemmaModelState(it) },
     onInstallGemma: (GemmaModel) -> Unit = {},
@@ -76,8 +78,13 @@ fun ModelManagementScreen(
     var deleteConfirm: GemmaModel? by remember { mutableStateOf(null) }
     var inferenceDialog by remember { mutableStateOf<InferenceDialog?>(null) }
     val inferenceEditable = gemmaPreferencesLoaded && !inferenceSaving
+    StackScaffold(
+        title = stringResource(R.string.nav_model_management),
+        onBack = onBack,
+        modifier = modifier,
+    ) { contentModifier ->
     Column(
-        modifier = modifier
+        modifier = contentModifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -177,6 +184,7 @@ fun ModelManagementScreen(
                 enabled = false,
             )
         }
+    }
     }
     val pendingDelete = deleteConfirm
     if (pendingDelete != null) {
@@ -502,6 +510,7 @@ private fun OcrModelRow(
 private fun ModelManagementScreenPreview() {
     MemoirTheme {
         ModelManagementScreen(
+            onBack = {},
             gemmaModels = listOf(
                 GemmaModelState(GemmaModel.E4B, GemmaModelStatus.Ready, selected = true),
                 GemmaModelState(GemmaModel.E2B, GemmaModelStatus.Downloading, 42, 100),

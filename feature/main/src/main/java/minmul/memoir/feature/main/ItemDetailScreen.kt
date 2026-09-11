@@ -1,7 +1,6 @@
 package minmul.memoir.feature.main
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -9,8 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
+import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.ItemDetail
 import minmul.memoir.core.model.JobStatus
@@ -33,6 +37,7 @@ import minmul.memoir.core.model.JobStatus
 @Composable
 fun ItemDetailScreen(
     itemId: String,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     item: ItemDetail? = null,
     loading: Boolean = false,
@@ -41,43 +46,59 @@ fun ItemDetailScreen(
     onDelete: () -> Unit = {},
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
-    Column(
-        modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        if (loading) CircularProgressIndicator()
-        if (failed) Text(stringResource(R.string.content_action_failed))
-        if (!loading && item == null) Text(stringResource(R.string.item_missing))
-        item?.let {
-            ImageThumbnail(
-                it.imagePath, Modifier
-                    .fillMaxWidth()
-                    .height(240.dp)
-            )
-            Text(
-                it.title ?: stringResource(R.string.archive_untitled),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            it.summary?.let { summary ->
-                Text(
-                    summary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    StackScaffold(
+        title = stringResource(R.string.nav_item_detail),
+        onBack = onBack,
+        modifier = modifier,
+        actions = {
+            IconButton(
+                onClick = { confirmDelete = true },
+                enabled = !busy && item != null,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.action_delete),
                 )
             }
-            if (it.status != JobStatus.Succeeded) {
-                Text(analysisStatusText(it.status))
-            }
-            SelectionContainer {
-                Column {
-                    Text(it.detailedSummary ?: stringResource(R.string.item_detail_empty_analysis))
+        },
+    ) { contentModifier ->
+        Column(
+            contentModifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            if (loading) CircularProgressIndicator()
+            if (failed) Text(stringResource(R.string.content_action_failed))
+            if (!loading && item == null) Text(stringResource(R.string.item_missing))
+            item?.let {
+                ImageThumbnail(
+                    it.imagePath, Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                )
+                Text(
+                    it.title ?: stringResource(R.string.archive_untitled),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                it.summary?.let { summary ->
+                    Text(
+                        summary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-            }
-            Spacer(Modifier.height(16.dp))
-            TextButton(onClick = { confirmDelete = true }, enabled = !busy) {
-                Text(stringResource(R.string.action_delete))
+                if (it.status != JobStatus.Succeeded) {
+                    Text(analysisStatusText(it.status))
+                }
+                SelectionContainer {
+                    Column {
+                        Text(
+                            it.detailedSummary
+                                ?: stringResource(R.string.item_detail_empty_analysis)
+                        )
+                    }
+                }
             }
         }
     }
@@ -107,6 +128,7 @@ private fun ItemDetailScreenPreview() {
     MemoirTheme {
         ItemDetailScreen(
             itemId = itemId,
+            onBack = {},
             item = ItemDetail(
                 itemId = itemId,
                 imagePath = "preview",

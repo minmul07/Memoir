@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun ModelManagementRoute(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     ocrViewModel: OcrModelViewModel = hiltViewModel(),
     gemmaViewModel: GemmaModelViewModel = hiltViewModel(),
@@ -20,6 +21,7 @@ fun ModelManagementRoute(
         gemmaViewModel.refresh()
     }
     ModelManagementScreen(
+        onBack = onBack,
         modifier = modifier,
         gemmaModels = gemmaState.models,
         onInstallGemma = gemmaViewModel::install,

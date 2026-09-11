@@ -31,11 +31,13 @@ import minmul.memoir.core.design.R
 import minmul.memoir.core.design.component.DialogItem
 import minmul.memoir.core.design.component.ItemSection
 import minmul.memoir.core.design.component.NavigationItem
+import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.AnalysisQueueMode
 
 @Composable
 fun SettingsScreen(
+    onBack: () -> Unit,
     onOpenModelManagement: () -> Unit,
     onOpenDeveloperOptions: () -> Unit,
     modifier: Modifier = Modifier,
@@ -45,8 +47,13 @@ fun SettingsScreen(
     onAnalysisQueueModeChange: (AnalysisQueueMode) -> Unit = {},
 ) {
     var showAnalysisModeDialog by remember { mutableStateOf(false) }
+    StackScaffold(
+        title = stringResource(R.string.nav_settings),
+        onBack = onBack,
+        modifier = modifier,
+    ) { contentModifier ->
     Column(
-        modifier = modifier
+        modifier = contentModifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
@@ -108,6 +115,7 @@ fun SettingsScreen(
                 onClick = onOpenDeveloperOptions,
             )
         }
+    }
     }
     if (showAnalysisModeDialog) {
         AnalysisQueueModeDialog(
@@ -178,6 +186,7 @@ private fun AnalysisQueueMode.labelRes(): Int = when (this) {
 private fun SettingsScreenPreview() {
     MemoirTheme {
         SettingsScreen(
+            onBack = {},
             onOpenModelManagement = {},
             onOpenDeveloperOptions = {},
         )

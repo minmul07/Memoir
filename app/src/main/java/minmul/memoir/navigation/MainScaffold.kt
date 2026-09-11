@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.R
+import minmul.memoir.core.design.component.MemoirTopBar
 import minmul.memoir.feature.main.ArchiveRoute
 import minmul.memoir.feature.main.HomeScreen
 import minmul.memoir.feature.queue.WorkQueueRoute
@@ -46,7 +45,6 @@ private enum class MainTab(
     Queue(R.string.nav_queue),
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScaffold(
     onOpenSettings: () -> Unit,
@@ -80,8 +78,8 @@ fun MainScaffold(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(selectedTab.labelRes)) },
+            MemoirTopBar(
+                title = stringResource(selectedTab.labelRes),
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(

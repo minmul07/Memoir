@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsRoute(
+    onBack: () -> Unit,
     onOpenModelManagement: () -> Unit,
     onOpenDeveloperOptions: () -> Unit,
     modifier: Modifier = Modifier,
@@ -15,6 +16,7 @@ fun SettingsRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     SettingsScreen(
+        onBack = onBack,
         analysisQueueMode = state.analysisQueueMode,
         analysisQueueModeLoaded = state.preferencesLoaded,
         analysisQueueModeFailed = state.preferencesFailed,

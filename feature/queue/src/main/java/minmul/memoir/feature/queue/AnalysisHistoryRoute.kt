@@ -9,12 +9,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun AnalysisHistoryRoute(
     onOpenItem: (String) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AnalysisHistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     AnalysisHistoryScreen(
         onOpenItem = onOpenItem,
+        onBack = onBack,
         items = state.items,
         loading = state.isLoading,
         failed = state.failed,
