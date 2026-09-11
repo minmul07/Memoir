@@ -39,8 +39,8 @@ data class GemmaInferenceSettings(
         ): GemmaInferenceSettings {
             val boundedTokens = maxOutputToken.coerceIn(MIN_MAX_OUTPUT_TOKEN, MAX_MAX_OUTPUT_TOKEN)
             val aligned = MIN_MAX_OUTPUT_TOKEN +
-                ((boundedTokens - MIN_MAX_OUTPUT_TOKEN + MAX_OUTPUT_TOKEN_STEP / 2) /
-                    MAX_OUTPUT_TOKEN_STEP) * MAX_OUTPUT_TOKEN_STEP
+                    ((boundedTokens - MIN_MAX_OUTPUT_TOKEN + MAX_OUTPUT_TOKEN_STEP / 2) /
+                            MAX_OUTPUT_TOKEN_STEP) * MAX_OUTPUT_TOKEN_STEP
             return GemmaInferenceSettings(
                 maxOutputToken = aligned.coerceIn(MIN_MAX_OUTPUT_TOKEN, MAX_MAX_OUTPUT_TOKEN),
                 topK = topK.coerceIn(MIN_TOP_K, MAX_TOP_K),

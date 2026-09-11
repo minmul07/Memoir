@@ -29,10 +29,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AnalysisModule {
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun repository(impl: AnalysisRepositoryImpl): AnalysisRepository = impl
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun ocr(@ApplicationContext context: Context, preferences: OcrModelPreferencesStore) =
         MultilingualOcrEngine(context) { OcrModel.entries.toSet() - preferences.disabledOcrModels.first() }
 
@@ -62,7 +64,8 @@ object AnalysisModule {
         preferences: GemmaModelPreferencesStore,
     ): ReadyGemmaModelLocator = StoreReadyGemmaModelLocator(store, preferences)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun runner(
         repository: AnalysisRepository,
         content: ContentRepository,

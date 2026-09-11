@@ -1,8 +1,8 @@
 package minmul.memoir.data.content
 
 import kotlinx.coroutines.flow.Flow
-import minmul.memoir.core.model.QueueItem
 import minmul.memoir.core.model.ItemSource
+import minmul.memoir.core.model.QueueItem
 
 interface ContentRepository {
     fun observeQueue(): Flow<List<QueueItem>>

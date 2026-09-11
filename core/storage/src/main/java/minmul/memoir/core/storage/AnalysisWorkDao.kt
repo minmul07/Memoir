@@ -81,7 +81,8 @@ abstract class AnalysisWorkDao {
         val next = next() ?: return null
         if (claim(next.id, now) != 1) return null
         val item = item(next.itemId) ?: return null
-        return QueueEntry(next.id, next.itemId, item.filePath, JobStatus.Running,
+        return QueueEntry(
+            next.id, next.itemId, item.filePath, JobStatus.Running,
             JobStage.Ocr, next.attemptCount, next.errorMessage
         )
     }

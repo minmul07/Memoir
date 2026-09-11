@@ -1,8 +1,8 @@
 package minmul.memoir.core.storage
 
+import minmul.memoir.core.model.ItemFiles
 import java.io.File
 import java.io.OutputStream
-import minmul.memoir.core.model.ItemFiles
 
 class OriginalFileStore(private val filesDir: File) {
     fun writeAtomically(itemId: String, write: (OutputStream) -> Unit): String {

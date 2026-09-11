@@ -45,15 +45,25 @@ fun DeveloperOptionsScreen(
         AlertDialog(
             onDismissRequest = { deletion = null },
             title = { Text(stringResource(title)) },
-            text = { Text(stringResource(if (title == R.string.developer_delete_queue)
-                R.string.queue_delete_confirmation else R.string.all_items_delete_confirmation)) },
-            confirmButton = { TextButton(onClick = {
-                deletion = null
-                if (title == R.string.developer_delete_queue) onDeleteQueue() else onDeleteAllItems()
-            }) { Text(stringResource(R.string.action_delete)) } },
-            dismissButton = { TextButton(onClick = { deletion = null }) {
-                Text(stringResource(R.string.action_cancel))
-            } },
+            text = {
+                Text(
+                    stringResource(
+                        if (title == R.string.developer_delete_queue)
+                            R.string.queue_delete_confirmation else R.string.all_items_delete_confirmation
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    deletion = null
+                    if (title == R.string.developer_delete_queue) onDeleteQueue() else onDeleteAllItems()
+                }) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deletion = null }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
         )
     }
 }

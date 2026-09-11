@@ -109,7 +109,9 @@ fun ModelManagementScreen(
             DialogItem(
                 title = stringResource(R.string.gemma_max_output_tokens),
                 value = inference.maxOutputToken.toString(),
-                onClick = { if (inferenceEditable) inferenceDialog = InferenceDialog.MaxOutputToken },
+                onClick = {
+                    if (inferenceEditable) inferenceDialog = InferenceDialog.MaxOutputToken
+                },
             )
             DialogItem(
                 title = stringResource(R.string.gemma_top_k),
@@ -202,31 +204,33 @@ fun ModelManagementScreen(
             title = stringResource(R.string.gemma_max_output_tokens),
             value = inference.maxOutputToken.toFloat(),
             valueRange = GemmaInferenceSettings.MIN_MAX_OUTPUT_TOKEN.toFloat()..
-                GemmaInferenceSettings.MAX_MAX_OUTPUT_TOKEN.toFloat(),
+                    GemmaInferenceSettings.MAX_MAX_OUTPUT_TOKEN.toFloat(),
             steps = (GemmaInferenceSettings.MAX_MAX_OUTPUT_TOKEN -
-                GemmaInferenceSettings.MIN_MAX_OUTPUT_TOKEN) /
-                GemmaInferenceSettings.MAX_OUTPUT_TOKEN_STEP - 1,
+                    GemmaInferenceSettings.MIN_MAX_OUTPUT_TOKEN) /
+                    GemmaInferenceSettings.MAX_OUTPUT_TOKEN_STEP - 1,
             format = {
                 GemmaInferenceSettings.clamp(maxOutputToken = it.toInt()).maxOutputToken.toString()
             },
             onConfirm = { onMaxOutputTokenChange(it.toInt()) },
             onDismiss = { inferenceDialog = null },
         )
+
         InferenceDialog.TopK -> InferenceSliderDialog(
             title = stringResource(R.string.gemma_top_k),
             value = inference.topK.toFloat(),
             valueRange = GemmaInferenceSettings.MIN_TOP_K.toFloat()..
-                GemmaInferenceSettings.MAX_TOP_K.toFloat(),
+                    GemmaInferenceSettings.MAX_TOP_K.toFloat(),
             steps = GemmaInferenceSettings.MAX_TOP_K - GemmaInferenceSettings.MIN_TOP_K - 1,
             format = { GemmaInferenceSettings.clamp(topK = it.toInt()).topK.toString() },
             onConfirm = { onTopKChange(it.toInt()) },
             onDismiss = { inferenceDialog = null },
         )
+
         InferenceDialog.TopP -> InferenceSliderDialog(
             title = stringResource(R.string.gemma_top_p),
             value = inference.topP.toFloat(),
             valueRange = GemmaInferenceSettings.MIN_TOP_P.toFloat()..
-                GemmaInferenceSettings.MAX_TOP_P.toFloat(),
+                    GemmaInferenceSettings.MAX_TOP_P.toFloat(),
             steps = sliderSteps(
                 GemmaInferenceSettings.MIN_TOP_P,
                 GemmaInferenceSettings.MAX_TOP_P,
@@ -236,11 +240,12 @@ fun ModelManagementScreen(
             onConfirm = { onTopPChange(it.toDouble()) },
             onDismiss = { inferenceDialog = null },
         )
+
         InferenceDialog.Temperature -> InferenceSliderDialog(
             title = stringResource(R.string.gemma_temperature),
             value = inference.temperature.toFloat(),
             valueRange = GemmaInferenceSettings.MIN_TEMPERATURE.toFloat()..
-                GemmaInferenceSettings.MAX_TEMPERATURE.toFloat(),
+                    GemmaInferenceSettings.MAX_TEMPERATURE.toFloat(),
             steps = sliderSteps(
                 GemmaInferenceSettings.MIN_TEMPERATURE,
                 GemmaInferenceSettings.MAX_TEMPERATURE,
@@ -252,6 +257,7 @@ fun ModelManagementScreen(
             onConfirm = { onTemperatureChange(it.toDouble()) },
             onDismiss = { inferenceDialog = null },
         )
+
         null -> Unit
     }
 }

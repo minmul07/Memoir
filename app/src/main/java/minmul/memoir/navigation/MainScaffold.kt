@@ -144,10 +144,12 @@ fun MainScaffold(
                 onOpenItem = onOpenItem,
                 modifier = contentModifier,
             )
+
             MainTab.Home -> HomeScreen(
                 onOpenItem = onOpenItem,
                 modifier = contentModifier,
             )
+
             MainTab.Queue -> WorkQueueRoute(
                 onOpenHistory = onOpenHistory,
                 onOpenItem = onOpenItem,

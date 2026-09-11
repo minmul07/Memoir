@@ -299,7 +299,8 @@ class GemmaModelViewModelTest {
 
         override suspend fun setSpeculativeDecodingEnabled(enabled: Boolean) {
             check(!failWrites) { "write_failed" }
-            inferenceSettings.value = inferenceSettings.value.copy(speculativeDecodingEnabled = enabled)
+            inferenceSettings.value =
+                inferenceSettings.value.copy(speculativeDecodingEnabled = enabled)
         }
     }
 }

@@ -21,19 +21,24 @@ class AnalysisRepositoryImpl @Inject constructor(
     override fun observeItems() = dao.observeItems().map { entries ->
         entries.map(DetailEntry::toModel)
     }
+
     override fun observeHistory() = dao.observeHistory().map { it.map(QueueEntry::toModel) }
     override fun observeDetail(itemId: String) = dao.observeDetail(itemId).map { entry ->
         entry?.toModel()
     }
+
     override suspend fun hasQueuedWork() = dao.hasQueuedWork()
     override suspend fun claimNext() = dao.claimNext(System.currentTimeMillis())?.toModel()
     override suspend fun setStage(jobId: String, stage: JobStage) = dao.setStage(jobId, stage)
     override suspend fun complete(jobId: String, ocrText: String?, payloadJson: String) =
         dao.complete(jobId, OcrText.stored(ocrText), payloadJson, System.currentTimeMillis())
+
     override suspend fun fail(jobId: String, errorCode: String) =
         dao.fail(jobId, errorCode, System.currentTimeMillis())
+
     override suspend fun failActiveQueue(errorCode: String) =
         dao.failActiveQueue(errorCode, System.currentTimeMillis())
+
     override suspend fun recoverInterrupted() = dao.recoverInterrupted(System.currentTimeMillis())
     override suspend fun cancel(jobId: String) = dao.cancel(jobId, System.currentTimeMillis())
     override suspend fun deleteQueue() = dao.deleteQueue()
@@ -44,6 +49,7 @@ class AnalysisRepositoryImpl @Inject constructor(
         content.discardOriginals(listOf(itemId))
         database.itemDao().deleteById(itemId)
     }
+
     override suspend fun deleteAllItems() {
         // Snapshot IDs so concurrently imported items and their files are not accidentally removed.
         dao.itemIds().forEach { deleteItem(it) }

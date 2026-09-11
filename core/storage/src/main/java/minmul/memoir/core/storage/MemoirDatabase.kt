@@ -6,8 +6,8 @@ import androidx.room3.Database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
+import kotlin.coroutines.CoroutineContext
 
 @Database(
     entities = [

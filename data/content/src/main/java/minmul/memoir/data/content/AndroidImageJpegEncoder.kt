@@ -4,12 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ImageDecoder
+import androidx.core.graphics.createBitmap
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.graphics.createBitmap
 
 @Singleton
 class AndroidImageJpegEncoder @Inject constructor() : ImageJpegEncoder {

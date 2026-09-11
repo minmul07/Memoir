@@ -22,9 +22,11 @@ fun MemoirTheme(
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && darkTheme -> {
             dynamicDarkColorScheme(LocalContext.current)
         }
+
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !darkTheme -> {
             dynamicLightColorScheme(LocalContext.current)
         }
+
         darkTheme -> darkColorScheme()
         else -> expressiveLightColorScheme()
     }

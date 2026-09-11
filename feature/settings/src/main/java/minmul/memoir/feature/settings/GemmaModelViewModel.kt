@@ -185,7 +185,10 @@ class GemmaModelViewModel @Inject constructor(
 
     fun setMaxOutputToken(value: Int) {
         val clamped = GemmaInferenceSettings.clamp(maxOutputToken = value).maxOutputToken
-        setInference("set_max_output_token value=$clamped", state.value.inference.maxOutputToken == clamped) {
+        setInference(
+            "set_max_output_token value=$clamped",
+            state.value.inference.maxOutputToken == clamped
+        ) {
             preferences.setMaxOutputToken(value)
         }
     }
@@ -206,13 +209,19 @@ class GemmaModelViewModel @Inject constructor(
 
     fun setTemperature(value: Double) {
         val clamped = GemmaInferenceSettings.clamp(temperature = value).temperature
-        setInference("set_temperature value=$clamped", state.value.inference.temperature == clamped) {
+        setInference(
+            "set_temperature value=$clamped",
+            state.value.inference.temperature == clamped
+        ) {
             preferences.setTemperature(value)
         }
     }
 
     fun setThinkingEnabled(enabled: Boolean) {
-        setInference("set_thinking enabled=$enabled", state.value.inference.thinkingEnabled == enabled) {
+        setInference(
+            "set_thinking enabled=$enabled",
+            state.value.inference.thinkingEnabled == enabled
+        ) {
             preferences.setThinkingEnabled(enabled)
         }
     }

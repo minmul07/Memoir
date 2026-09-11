@@ -113,7 +113,12 @@ class GemmaModelPreferencesTest {
             }
             val repository = UserPreferencesRepository(dataStore)
             assertEquals(
-                GemmaInferenceSettings(maxOutputToken = 128, topK = 128, topP = 1.0, temperature = 0.0),
+                GemmaInferenceSettings(
+                    maxOutputToken = 128,
+                    topK = 128,
+                    topP = 1.0,
+                    temperature = 0.0
+                ),
                 repository.inferenceSettings.first(),
             )
         } finally {

@@ -33,9 +33,14 @@ configurations.configureEach {
     if (name.contains("UnitTestRuntimeClasspath", ignoreCase = true)) {
         resolutionStrategy.dependencySubstitution {
             // Android AAR only ships device .so files; host JVM tests need the desktop natives.
-            val sqliteBundledJvm = "androidx.sqlite:sqlite-bundled-jvm:${libs.versions.sqlite.get()}"
+            val sqliteBundledJvm =
+                "androidx.sqlite:sqlite-bundled-jvm:${libs.versions.sqlite.get()}"
             substitute(module("androidx.sqlite:sqlite-bundled")).using(module(sqliteBundledJvm))
-            substitute(module("androidx.sqlite:sqlite-bundled-android")).using(module(sqliteBundledJvm))
+            substitute(module("androidx.sqlite:sqlite-bundled-android")).using(
+                module(
+                    sqliteBundledJvm
+                )
+            )
         }
     }
 }

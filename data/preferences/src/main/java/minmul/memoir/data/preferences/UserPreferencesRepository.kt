@@ -48,22 +48,23 @@ class UserPreferencesRepository internal constructor(
         }
     }
 
-    override val inferenceSettings: Flow<GemmaInferenceSettings> = dataStore.data.map { preferences ->
-        GemmaInferenceSettings.clamp(
-            maxOutputToken = preferences[UserPreferencesKeys.GEMMA_MAX_OUTPUT_TOKEN]
-                ?: GemmaInferenceSettings.DEFAULT_MAX_OUTPUT_TOKEN,
-            topK = preferences[UserPreferencesKeys.GEMMA_TOP_K]
-                ?: GemmaInferenceSettings.DEFAULT_TOP_K,
-            thinkingEnabled = preferences[UserPreferencesKeys.GEMMA_THINKING_ENABLED]
-                ?: GemmaInferenceSettings.DEFAULT_THINKING_ENABLED,
-            topP = preferences[UserPreferencesKeys.GEMMA_TOP_P]
-                ?: GemmaInferenceSettings.DEFAULT_TOP_P,
-            temperature = preferences[UserPreferencesKeys.GEMMA_TEMPERATURE]
-                ?: GemmaInferenceSettings.DEFAULT_TEMPERATURE,
-            speculativeDecodingEnabled = preferences[UserPreferencesKeys.GEMMA_SPECULATIVE_DECODING]
-                ?: GemmaInferenceSettings.DEFAULT_SPECULATIVE_DECODING,
-        )
-    }
+    override val inferenceSettings: Flow<GemmaInferenceSettings> =
+        dataStore.data.map { preferences ->
+            GemmaInferenceSettings.clamp(
+                maxOutputToken = preferences[UserPreferencesKeys.GEMMA_MAX_OUTPUT_TOKEN]
+                    ?: GemmaInferenceSettings.DEFAULT_MAX_OUTPUT_TOKEN,
+                topK = preferences[UserPreferencesKeys.GEMMA_TOP_K]
+                    ?: GemmaInferenceSettings.DEFAULT_TOP_K,
+                thinkingEnabled = preferences[UserPreferencesKeys.GEMMA_THINKING_ENABLED]
+                    ?: GemmaInferenceSettings.DEFAULT_THINKING_ENABLED,
+                topP = preferences[UserPreferencesKeys.GEMMA_TOP_P]
+                    ?: GemmaInferenceSettings.DEFAULT_TOP_P,
+                temperature = preferences[UserPreferencesKeys.GEMMA_TEMPERATURE]
+                    ?: GemmaInferenceSettings.DEFAULT_TEMPERATURE,
+                speculativeDecodingEnabled = preferences[UserPreferencesKeys.GEMMA_SPECULATIVE_DECODING]
+                    ?: GemmaInferenceSettings.DEFAULT_SPECULATIVE_DECODING,
+            )
+        }
 
     override suspend fun setMaxOutputToken(value: Int) {
         val settings = GemmaInferenceSettings.clamp(maxOutputToken = value)

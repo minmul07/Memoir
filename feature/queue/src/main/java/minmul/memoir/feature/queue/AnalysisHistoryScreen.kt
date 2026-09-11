@@ -39,7 +39,10 @@ fun AnalysisHistoryScreen(
     var filter by rememberSaveable { mutableStateOf<JobStatus?>(null) }
     val filtered = items.filter { filter == null || it.status == filter }
     Column(modifier.fillMaxSize()) {
-        Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier.padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             listOf(JobStatus.Cancelled, JobStatus.Failed, JobStatus.Succeeded).forEach { status ->
                 FilterChip(
                     selected = filter == status,

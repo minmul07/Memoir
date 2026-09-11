@@ -72,12 +72,14 @@ fun ImageThumbnail(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surfaceContainer),
             )
+
             image != null -> Image(
                 bitmap = image,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
+
             failed -> Text(stringResource(R.string.image_preview_failed))
             else -> CircularProgressIndicator()
         }

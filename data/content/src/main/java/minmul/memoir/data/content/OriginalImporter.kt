@@ -1,7 +1,7 @@
 package minmul.memoir.data.content
 
-import java.io.InputStream
 import minmul.memoir.core.storage.OriginalFileStore
+import java.io.InputStream
 
 class OriginalImporter(
     private val fileStore: OriginalFileStore,
