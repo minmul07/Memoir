@@ -149,7 +149,7 @@ class GemmaLlmEngine internal constructor(
     }
 
     private fun prompt(ocrText: String?): String =
-        "$SUMMARY_PROMPT\n${ocrText.orEmpty()}"
+        "$SYSTEM_PROMPT\n\nOCR:\n${ocrText.orEmpty()}"
 
     private fun conversationConfig(settings: GemmaInferenceSettings) = ConversationConfig(
         samplerConfig = SamplerConfig(
@@ -162,7 +162,14 @@ class GemmaLlmEngine internal constructor(
     )
 
     private companion object {
-        const val SUMMARY_PROMPT = "이 이미지와 아래 OCR 텍스트를 한 문단으로 요약하세요."
+        const val SYSTEM_PROMPT =
+            "당신은 스크린샷 분석기다. 한국어로 답한다.\n" +
+                    "아래 형식으로만 출력한다. 코드펜스나 설명 문장을 쓰지 않는다.\n" +
+                    "title: 짧은 제목\n" +
+                    "summary: 한 줄 요약\n" +
+                    "---\n" +
+                    "스크린샷에 포함된 정보를 빠짐없이 정리한 본문. 복잡해도 축약하지 않는다. 필요한 경우 마크다운을 사용할 수 있다.\n" +
+                    "summary 줄은 없으면 생략한다. 이미지와 OCR을 함께 사용한다. OCR이 비어 있으면 이미지만으로 작성한다."
     }
 }
 

@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import minmul.memoir.core.ai.LlmEngine
 import minmul.memoir.core.ai.OcrEngine
+import minmul.memoir.core.model.AnalysisPayload
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.data.content.AnalysisRepository
 import minmul.memoir.data.content.ContentRepository
@@ -74,12 +75,23 @@ class AnalysisRunner(
                             log("$context stage=infer begin")
                             val summary =
                                 llm.summarize(imageFile(item.imagePath).absolutePath, text)
-                            val payload = summaryPayload(summary)
-                            log("$context stage=infer complete payloadChars=${payload.length}")
+                            val payload = when (val parsed = AnalysisPayload.parseResult(summary)) {
+                                is AnalysisPayload.ParseResult.Success -> parsed.payload
+                                is AnalysisPayload.ParseResult.Failure -> {
+                                    log(
+                                        "$context stage=infer parse_failed " +
+                                                "payloadChars=${parsed.payloadChars} " +
+                                                "reason=${parsed.reason.logName}",
+                                    )
+                                    throw IllegalArgumentException("invalid_payload")
+                                }
+                            }
+                            val encoded = payload.encoded()
+                            log("$context stage=infer complete payloadChars=${encoded.length}")
                             stage = JobStage.Saving
                             repository.setStage(item.jobId, JobStage.Saving)
                             log("$context stage=saving begin")
-                            repository.complete(item.jobId, text, payload)
+                            repository.complete(item.jobId, text, encoded)
                             log("$context completion_returned elapsedMs=${(System.nanoTime() - started) / 1_000_000}")
                         } catch (cancelled: CancellationException) {
                             log("$context cancelled stage=$stage")
@@ -110,26 +122,3 @@ class AnalysisRunner(
         log("queue drain_end")
     }
 }
-
-private fun summaryPayload(summary: String): String =
-    buildString {
-        append("{\"summary\":")
-        append('"')
-        for (ch in summary) {
-            when (ch) {
-                '\\' -> append("\\\\")
-                '"' -> append("\\\"")
-                '\n' -> append("\\n")
-                '\r' -> append("\\r")
-                '\t' -> append("\\t")
-                else -> if (ch.code < 0x20) {
-                    append("\\u")
-                    append(ch.code.toString(16).padStart(4, '0'))
-                } else {
-                    append(ch)
-                }
-            }
-        }
-        append('"')
-        append('}')
-    }

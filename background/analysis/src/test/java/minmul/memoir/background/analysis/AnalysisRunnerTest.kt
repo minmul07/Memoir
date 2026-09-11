@@ -39,7 +39,7 @@ class AnalysisRunnerTest {
         val llm = FakeLlmEngine { path, text ->
             assertEquals("한국어", text)
             if (File(path).name == "a") error("fake")
-            "ok"
+            VALID_PAYLOAD
         }
         analysisRunner(repository, ocr, llm).drain()
 
@@ -57,7 +57,7 @@ class AnalysisRunnerTest {
         var attempts = 0
         val llm = FakeLlmEngine { _, _ ->
             if (attempts++ == 0) error("fake")
-            "ok"
+            VALID_PAYLOAD
         }
         analysisRunner(repository, successfulOcr(), llm).drain()
         assertEquals(listOf("a"), repository.completed)
@@ -241,9 +241,29 @@ class AnalysisRunnerTest {
         analysisRunner(repository, successfulOcr(), llm).drain()
         assertEquals(listOf(imageFile("a").absolutePath to "text"), llm.summarizeCalls)
         assertEquals(listOf("a"), repository.completed)
-        assertEquals(listOf("""{"summary":"summary"}"""), repository.payloads)
+        assertEquals(listOf("""{"title":"T","detailed_summary":"D"}"""), repository.payloads)
         assertEquals(1, llm.closeCalls)
         assertEquals(LlmRuntimeStatus.Idle, llm.status.value)
+    }
+
+    @Test
+    fun `invalid structured output fails the job without completing`() = runTest {
+        val repository = FakeAnalysisRepository(listOf("a"))
+        val raw = """{"summary":"legacy"}"""
+        val llm = FakeLlmEngine { _, _ -> raw }
+        val logs = mutableListOf<String>()
+        analysisRunner(repository, successfulOcr(), llm, logs).drain()
+        assertTrue(repository.completed.isEmpty())
+        assertTrue(repository.payloads.isEmpty())
+        assertEquals(JobStatus.Failed, repository.jobs.value.single().status)
+        assertEquals(1, repository.jobs.value.single().attemptCount)
+        assertTrue(
+            logs.any {
+                it.contains("stage=infer parse_failed") &&
+                        it.contains("payloadChars=${raw.length}") &&
+                        it.contains("reason=missing_title")
+            },
+        )
     }
 
 
@@ -261,7 +281,7 @@ class AnalysisRunnerTest {
                     withContext(NonCancellable) { release.await() }
                 }
             }
-            "ok"
+            VALID_PAYLOAD
         }
         val task = launch { analysisRunner(repository, successfulOcr(), llm).drain() }
         entered.await()
@@ -285,10 +305,11 @@ class AnalysisRunnerTest {
         repository: FakeAnalysisRepository,
         ocr: OcrEngine,
         llm: FakeLlmEngine,
+        logs: MutableList<String> = mutableListOf(),
         locate: ReadyGemmaModelLocator = ReadyGemmaModelLocator {
             LocatedGemmaModel(GemmaModel.E2B, File("gemma-4-E2B-it.litertlm"))
         },
-    ) = AnalysisRunner(repository, repository, ocr, llm, locate, ::imageFile)
+    ) = AnalysisRunner(repository, repository, ocr, llm, locate, ::imageFile, logs::add)
 
     private fun imageFile(relative: String) = File("/memoir-files", relative)
 }

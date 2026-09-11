@@ -5,5 +5,8 @@ data class ItemDetail(
     val imagePath: String,
     val status: JobStatus?,
     val ocrText: String?,
-    val payloadJson: String?,
+    val createdAt: Long,
+    val title: String?,
+    val summary: String?,
+    val detailedSummary: String?,
 )

@@ -14,9 +14,11 @@ abstract class AnalysisWorkDao {
     @Query(
         """
         SELECT i.id AS itemId, i.file_path AS imagePath, j.status,
-            NULL AS ocrText, NULL AS payloadJson
+            r.ocr_text AS ocrText, r.payload_json AS payloadJson,
+            i.created_at AS createdAt
         FROM items i
         LEFT JOIN analysis_jobs j ON j.item_id = i.id
+        LEFT JOIN analysis_results r ON r.item_id = i.id
         ORDER BY i.created_at DESC, i.id
     """
     )
@@ -36,7 +38,8 @@ abstract class AnalysisWorkDao {
     @Query(
         """
         SELECT i.id AS itemId, i.file_path AS imagePath, j.status,
-            r.ocr_text AS ocrText, r.payload_json AS payloadJson
+            r.ocr_text AS ocrText, r.payload_json AS payloadJson,
+            i.created_at AS createdAt
         FROM items i
         LEFT JOIN analysis_jobs j ON j.item_id = i.id
         LEFT JOIN analysis_results r ON r.item_id = i.id

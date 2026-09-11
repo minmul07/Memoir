@@ -41,26 +41,41 @@ fun ItemDetailScreen(
     onDelete: () -> Unit = {},
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
-    Column(modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())
-        .padding(16.dp)) {
+    Column(
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
         if (loading) CircularProgressIndicator()
         if (failed) Text(stringResource(R.string.content_action_failed))
         if (!loading && item == null) Text(stringResource(R.string.item_missing))
         item?.let {
-            ImageThumbnail(it.imagePath, Modifier
-                .fillMaxWidth()
-                .height(240.dp))
-            Text(itemId, style = MaterialTheme.typography.titleMedium)
-            Text(analysisStatusText(it.status))
+            ImageThumbnail(
+                it.imagePath, Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+            )
+            Text(
+                it.title ?: stringResource(R.string.archive_untitled),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            it.summary?.let { summary ->
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (it.status != JobStatus.Succeeded) {
+                Text(analysisStatusText(it.status))
+            }
             SelectionContainer {
                 Column {
-                    Text(it.ocrText ?: stringResource(R.string.ocr_empty))
-                    Spacer(Modifier.height(16.dp))
-                    Text(it.payloadJson ?: stringResource(R.string.item_detail_empty_analysis))
+                    Text(it.detailedSummary ?: stringResource(R.string.item_detail_empty_analysis))
                 }
             }
+            Spacer(Modifier.height(16.dp))
             TextButton(onClick = { confirmDelete = true }, enabled = !busy) {
                 Text(stringResource(R.string.action_delete))
             }
@@ -71,12 +86,16 @@ fun ItemDetailScreen(
             onDismissRequest = { confirmDelete = false },
             title = { Text(stringResource(R.string.action_delete)) },
             text = { Text(stringResource(R.string.item_delete_confirmation)) },
-            confirmButton = { TextButton(onClick = { confirmDelete = false; onDelete() }) {
-                Text(stringResource(R.string.action_delete))
-            } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) {
-                Text(stringResource(R.string.action_cancel))
-            } },
+            confirmButton = {
+                TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                    Text(stringResource(R.string.action_delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
         )
     }
 }
@@ -93,7 +112,10 @@ private fun ItemDetailScreenPreview() {
                 imagePath = "preview",
                 status = JobStatus.Succeeded,
                 ocrText = stringResource(R.string.preview_ocr_text),
-                payloadJson = stringResource(R.string.preview_analysis_payload),
+                createdAt = 1_725_926_400_000L,
+                title = stringResource(R.string.preview_analysis_title),
+                summary = stringResource(R.string.preview_analysis_summary),
+                detailedSummary = stringResource(R.string.preview_analysis_detailed),
             ),
         )
     }

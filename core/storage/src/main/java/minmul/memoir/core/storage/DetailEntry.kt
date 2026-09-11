@@ -8,4 +8,5 @@ data class DetailEntry(
     val status: JobStatus?,
     val ocrText: String?,
     val payloadJson: String?,
+    val createdAt: Long,
 )

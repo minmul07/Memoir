@@ -230,6 +230,7 @@ class MemoirDatabaseTest {
             assertEquals(JobStatus.Succeeded, detail?.status)
             assertEquals("한국어", detail?.ocrText)
             assertEquals("{\"fake\":true}", detail?.payloadJson)
+            assertEquals(1L, detail?.createdAt)
             cancelAndIgnoreRemainingEvents()
         }
         dao.observeHistory().test {
@@ -304,6 +305,24 @@ class MemoirDatabaseTest {
             assertEquals(0, dao.job("b")?.attemptCount)
             assertNull(dao.claimNext(4))
         }
+
+    @Test
+    fun `item list includes created time and analysis payload`() = runDatabaseTest { db ->
+        db.contentWriteDao()
+            .insertItemsAndJobs(listOf(ItemJobWrite(itemEntity("a"), jobEntity("a", "a"))))
+        val dao = db.analysisWorkDao()
+        dao.claimNext(2)
+        dao.complete("a", "한국어", """{"title":"T","detailed_summary":"D"}""", 3)
+        dao.observeItems().test {
+            val item = awaitItem().single()
+            assertEquals("a", item.itemId)
+            assertEquals(1L, item.createdAt)
+            assertEquals("""{"title":"T","detailed_summary":"D"}""", item.payloadJson)
+            assertEquals("한국어", item.ocrText)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun runDatabaseTest(testBody: suspend TestScope.(MemoirDatabase) -> Unit) = runTest {
         val db = MemoirDatabase.createInMemory(StandardTestDispatcher(testScheduler))
         try {

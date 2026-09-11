@@ -9,7 +9,7 @@ import java.io.File
 
 class FakeLlmEngine(
     private val loadError: Throwable? = null,
-    private val onSummarize: suspend (imagePath: String, ocrText: String?) -> String = { _, _ -> "summary" },
+    private val onSummarize: suspend (imagePath: String, ocrText: String?) -> String = { _, _ -> VALID_PAYLOAD },
 ) : LlmEngine {
     private val mutableStatus = MutableStateFlow<LlmRuntimeStatus>(LlmRuntimeStatus.Idle)
     override val status = mutableStatus.asStateFlow()
@@ -46,3 +46,5 @@ class FakeLlmEngine(
         }
     }
 }
+
+const val VALID_PAYLOAD = "title: T\n---\nD"

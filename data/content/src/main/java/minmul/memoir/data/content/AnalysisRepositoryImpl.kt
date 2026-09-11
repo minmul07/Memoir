@@ -1,10 +1,12 @@
 package minmul.memoir.data.content
 
 import kotlinx.coroutines.flow.map
+import minmul.memoir.core.model.AnalysisPayload
 import minmul.memoir.core.model.ItemDetail
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.OcrText
 import minmul.memoir.core.model.QueueItem
+import minmul.memoir.core.storage.DetailEntry
 import minmul.memoir.core.storage.MemoirDatabase
 import minmul.memoir.core.storage.QueueEntry
 import javax.inject.Inject
@@ -17,11 +19,11 @@ class AnalysisRepositoryImpl @Inject constructor(
 ) : AnalysisRepository {
     private val dao get() = database.analysisWorkDao()
     override fun observeItems() = dao.observeItems().map { entries ->
-        entries.map { ItemDetail(it.itemId, it.imagePath, it.status, null, null) }
+        entries.map(DetailEntry::toModel)
     }
     override fun observeHistory() = dao.observeHistory().map { it.map(QueueEntry::toModel) }
     override fun observeDetail(itemId: String) = dao.observeDetail(itemId).map { entry ->
-        entry?.let { ItemDetail(it.itemId, it.imagePath, it.status, it.ocrText, it.payloadJson) }
+        entry?.toModel()
     }
     override suspend fun hasQueuedWork() = dao.hasQueuedWork()
     override suspend fun claimNext() = dao.claimNext(System.currentTimeMillis())?.toModel()
@@ -46,6 +48,20 @@ class AnalysisRepositoryImpl @Inject constructor(
         // Snapshot IDs so concurrently imported items and their files are not accidentally removed.
         dao.itemIds().forEach { deleteItem(it) }
     }
+}
+
+private fun DetailEntry.toModel(): ItemDetail {
+    val payload = payloadJson?.let(AnalysisPayload::parse)
+    return ItemDetail(
+        itemId = itemId,
+        imagePath = imagePath,
+        status = status,
+        ocrText = ocrText,
+        createdAt = createdAt,
+        title = payload?.title,
+        summary = payload?.summary,
+        detailedSummary = payload?.detailedSummary,
+    )
 }
 
 private fun QueueEntry.toModel() =
