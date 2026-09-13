@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -24,7 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,7 +85,7 @@ fun MainScaffold(
                     if (selectedTab == MainTab.Queue) {
                         IconButton(onClick = onOpenHistory) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_history),
+                                imageVector = Icons.Filled.History,
                                 contentDescription = stringResource(R.string.nav_analysis_history),
                             )
                         }
@@ -120,7 +121,7 @@ fun MainScaffold(
                         icon = {
                             when (tab) {
                                 MainTab.Archive -> Icon(
-                                    painter = painterResource(R.drawable.ic_nav_archive),
+                                    imageVector = Icons.Filled.Archive,
                                     contentDescription = stringResource(tab.labelRes),
                                 )
 
