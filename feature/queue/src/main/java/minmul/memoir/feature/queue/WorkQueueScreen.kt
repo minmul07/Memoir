@@ -19,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +40,7 @@ import kotlinx.coroutines.delay
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
+import minmul.memoir.core.design.component.MemoirFab
 import minmul.memoir.core.design.llmRuntimeStatusText
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.GemmaModel
@@ -56,7 +55,6 @@ fun WorkQueueScreen(
     items: List<QueueItem>,
     isLoading: Boolean,
     failed: Boolean,
-    onOpenHistory: () -> Unit,
     modifier: Modifier = Modifier,
     onCancel: (String) -> Unit = {},
     onOpenItem: (String) -> Unit = {},
@@ -158,29 +156,44 @@ fun WorkQueueScreen(
             }
             if (actionFailed) Text(stringResource(R.string.content_action_failed))
             if (serviceFailed) Text(stringResource(R.string.analysis_service_failed))
-            TextButton(onClick = onOpenHistory, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.nav_analysis_history))
-            }
         }
-        if (items.isNotEmpty()) {
-            FloatingActionButton(
-                onClick = onStart,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = if (llmStatusText != null) 96.dp else 80.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.analysis_restart),
-                )
-            }
-        }
+        MemoirFab(
+            onClick = onStart,
+            imageVector = Icons.Filled.PlayArrow,
+            contentDescription = stringResource(R.string.analysis_restart),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            enabled = workQueueStartEnabled(items, isLoading, failed),
+        )
+    }
+}
+
+internal fun workQueueStartEnabled(
+    items: List<QueueItem>,
+    isLoading: Boolean,
+    failed: Boolean,
+): Boolean =
+    !isLoading && !failed && items.isNotEmpty() && items.all { it.status == JobStatus.Queued }
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkQueueScreenPreview() {
+    MemoirTheme {
+        WorkQueueScreen(
+            items = listOf(
+                QueueItem("1", "1", "preview", JobStatus.Queued),
+                QueueItem("2", "2", "preview", JobStatus.Queued),
+            ),
+            isLoading = false,
+            failed = false,
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun WorkQueueScreenPreview() {
+private fun WorkQueueScreenAnalyzingPreview() {
     MemoirTheme {
         WorkQueueScreen(
             items = listOf(
@@ -189,8 +202,19 @@ private fun WorkQueueScreenPreview() {
             ),
             isLoading = false,
             failed = false,
-            onOpenHistory = {},
             llmStatus = LlmRuntimeStatus.Ready(GemmaModel.E4B),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkQueueScreenEmptyPreview() {
+    MemoirTheme {
+        WorkQueueScreen(
+            items = emptyList(),
+            isLoading = false,
+            failed = false,
         )
     }
 }
