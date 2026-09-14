@@ -2,8 +2,10 @@ package minmul.memoir.core.ai
 
 import android.content.Context
 import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.BenchmarkInfo
 import com.google.ai.edge.litertlm.Content
 import com.google.ai.edge.litertlm.Contents
+import com.google.ai.edge.litertlm.Conversation
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
@@ -27,6 +29,7 @@ import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.LlmRuntimeStatus
 import java.io.File
+import java.util.Locale
 
 class GemmaLlmEngine internal constructor(
     private val cacheDir: String,
@@ -34,6 +37,9 @@ class GemmaLlmEngine internal constructor(
     private val createEngine: (EngineConfig) -> Engine,
     private val settings: suspend () -> GemmaInferenceSettings = { GemmaInferenceSettings() },
     private val setSpeculativeDecoding: (Boolean) -> Unit = ::applySpeculativeDecodingFlag,
+    private val setBenchmark: (Boolean) -> Unit = ::applyBenchmarkFlag,
+    private val benchmarkInfo: (Conversation) -> BenchmarkInfo? = ::readBenchmarkInfo,
+    private val log: (String) -> Unit = AnalysisLog::write,
 ) : LlmEngine {
     constructor(
         context: Context,
@@ -60,6 +66,7 @@ class GemmaLlmEngine internal constructor(
             releaseNative()
             mutableStatus.value = LlmRuntimeStatus.Loading(model)
             val inference = settings()
+            setBenchmark(true)
             setSpeculativeDecoding(inference.speculativeDecodingEnabled)
             val created = createEngine(
                 EngineConfig(
@@ -94,6 +101,7 @@ class GemmaLlmEngine internal constructor(
                 current.createConversation(conversationConfig(inference)).use { conversation ->
                     val response = StringBuffer()
                     val finished = CompletableDeferred<String>()
+                    val started = System.nanoTime()
                     conversation.sendMessageAsync(
                         Contents.of(
                             Content.ImageFile(imagePath),
@@ -113,7 +121,7 @@ class GemmaLlmEngine internal constructor(
                             }
                         },
                     )
-                    try {
+                    val text = try {
                         finished.await()
                     } catch (cancelled: CancellationException) {
                         // Kotlin cancellation does not stop native inference. Wait for its
@@ -124,6 +132,8 @@ class GemmaLlmEngine internal constructor(
                         }
                         throw cancelled
                     }
+                    logInference(started, conversation)
+                    text
                 }
             }
         }
@@ -151,6 +161,13 @@ class GemmaLlmEngine internal constructor(
     private fun prompt(ocrText: String?): String =
         "$SYSTEM_PROMPT\n\nOCR:\n${ocrText.orEmpty()}"
 
+    private fun logInference(startedNs: Long, conversation: Conversation) {
+        runCatching {
+            val inferenceMs = (System.nanoTime() - startedNs) / 1_000_000
+            log(formatInferenceLog(inferenceMs, benchmarkInfo(conversation)))
+        }
+    }
+
     private fun conversationConfig(settings: GemmaInferenceSettings) = ConversationConfig(
         samplerConfig = SamplerConfig(
             topK = settings.topK,
@@ -176,4 +193,24 @@ class GemmaLlmEngine internal constructor(
 @OptIn(ExperimentalApi::class)
 private fun applySpeculativeDecodingFlag(enabled: Boolean) {
     ExperimentalFlags.enableSpeculativeDecoding = enabled
+}
+
+@OptIn(ExperimentalApi::class)
+private fun applyBenchmarkFlag(enabled: Boolean) {
+    ExperimentalFlags.enableBenchmark = enabled
+}
+
+@OptIn(ExperimentalApi::class)
+private fun readBenchmarkInfo(conversation: Conversation): BenchmarkInfo? =
+    runCatching { conversation.getBenchmarkInfo() }.getOrNull()
+
+private fun formatInferenceLog(inferenceMs: Long, stats: BenchmarkInfo?): String {
+    if (stats == null) return "gemma infer complete inferenceMs=$inferenceMs"
+    return "gemma infer complete " +
+            "ttftMs=${(stats.timeToFirstTokenInSecond * 1_000).toLong()}ms " +
+            "inferenceMs=${inferenceMs}ms " +
+            "inputRate=${"%.2f".format(Locale.US, stats.lastPrefillTokensPerSecond)}tk/s " +
+            "outputRate=${"%.2f".format(Locale.US, stats.lastDecodeTokensPerSecond)}tk/s " +
+            "inputTokens=${stats.lastPrefillTokenCount}tks " +
+            "outputTokens=${stats.lastDecodeTokenCount}tks"
 }
