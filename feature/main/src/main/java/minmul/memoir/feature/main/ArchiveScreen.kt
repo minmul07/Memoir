@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
@@ -49,13 +48,6 @@ fun ArchiveScreen(
                 supportingContent = {
                     Column {
                         Text(createdAtLabel(item.createdAt))
-                        item.summary?.let {
-                            Text(
-                                it,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                         if (item.status != JobStatus.Succeeded) {
                             Text(analysisStatusText(item.status))
                         }
@@ -94,7 +86,6 @@ private fun ArchiveScreenPreview() {
                     ocrText = null,
                     createdAt = 1_725_926_400_000L,
                     title = stringResource(R.string.preview_analysis_title),
-                    summary = stringResource(R.string.preview_analysis_summary),
                     detailedSummary = stringResource(R.string.preview_analysis_detailed),
                 ),
                 ItemDetail(
@@ -104,7 +95,6 @@ private fun ArchiveScreenPreview() {
                     ocrText = null,
                     createdAt = 1_725_926_400_000L,
                     title = null,
-                    summary = null,
                     detailedSummary = null,
                 ),
             ),

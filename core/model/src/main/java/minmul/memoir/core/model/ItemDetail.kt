@@ -7,6 +7,10 @@ data class ItemDetail(
     val ocrText: String?,
     val createdAt: Long,
     val title: String?,
-    val summary: String?,
     val detailedSummary: String?,
+    val time: List<AnalysisEntity> = emptyList(),
+    val period: List<AnalysisEntity> = emptyList(),
+    val location: List<AnalysisEntity> = emptyList(),
+    val account: List<AnalysisEntity> = emptyList(),
+    val phone: List<AnalysisEntity> = emptyList(),
 )

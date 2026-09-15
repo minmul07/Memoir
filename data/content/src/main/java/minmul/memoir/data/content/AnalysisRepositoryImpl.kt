@@ -65,8 +65,12 @@ private fun DetailEntry.toModel(): ItemDetail {
         ocrText = ocrText,
         createdAt = createdAt,
         title = payload?.title,
-        summary = payload?.summary,
         detailedSummary = payload?.detailedSummary,
+        time = payload?.time.orEmpty(),
+        period = payload?.period.orEmpty(),
+        location = payload?.location.orEmpty(),
+        account = payload?.account.orEmpty(),
+        phone = payload?.phone.orEmpty(),
     )
 }
 
