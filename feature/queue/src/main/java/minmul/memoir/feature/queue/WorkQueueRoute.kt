@@ -9,7 +9,6 @@ import minmul.memoir.core.model.LlmRuntimeStatus
 
 @Composable
 fun WorkQueueRoute(
-    onOpenHistory: () -> Unit,
     onOpenItem: (String) -> Unit,
     onStart: () -> Unit,
     serviceFailed: Boolean,
@@ -23,7 +22,6 @@ fun WorkQueueRoute(
         items = state.items,
         isLoading = state.isLoading,
         failed = state.failed,
-        onOpenHistory = onOpenHistory,
         onCancel = viewModel::cancel,
         onOpenItem = onOpenItem,
         onStart = onStart,

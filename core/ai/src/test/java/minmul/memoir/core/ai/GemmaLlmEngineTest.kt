@@ -1,5 +1,6 @@
 package minmul.memoir.core.ai
 
+import com.google.ai.edge.litertlm.BenchmarkInfo
 import com.google.ai.edge.litertlm.Contents
 import com.google.ai.edge.litertlm.Conversation
 import com.google.ai.edge.litertlm.ConversationConfig
@@ -29,6 +30,7 @@ import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.LlmRuntimeStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -44,6 +46,9 @@ class GemmaLlmEngineTest {
         scope: TestScope,
         settings: suspend () -> GemmaInferenceSettings = { GemmaInferenceSettings() },
         setSpeculativeDecoding: (Boolean) -> Unit = {},
+        setBenchmark: (Boolean) -> Unit = {},
+        benchmarkInfo: (Conversation) -> BenchmarkInfo? = { null },
+        log: (String) -> Unit = {},
     ): GemmaLlmEngine {
         every { native.isInitialized() } returns true
         every { native.createConversation(capture(config)) } returns conversation
@@ -54,6 +59,9 @@ class GemmaLlmEngineTest {
             { native },
             settings,
             setSpeculativeDecoding,
+            setBenchmark,
+            benchmarkInfo,
+            log,
         )
     }
 
@@ -136,6 +144,67 @@ class GemmaLlmEngineTest {
         }
 
     @Test
+    fun `successful inference logs benchmark metrics`() = runTest {
+        val logs = mutableListOf<String>()
+        val stats = BenchmarkInfo(
+            initTimeInSecond = 1.5,
+            timeToFirstTokenInSecond = 0.25,
+            lastPrefillTokenCount = 128,
+            lastDecodeTokenCount = 64,
+            lastPrefillTokensPerSecond = 512.5,
+            lastDecodeTokensPerSecond = 32.25,
+        )
+        val engine = engine(this, benchmarkInfo = { stats }, log = logs::add)
+        engine.load(GemmaModel.E2B, File("model"))
+        val task = async { engine.summarize("/image", null) }
+        runCurrent()
+        callback.captured.onDone()
+        task.await()
+        val line = logs.single()
+        assertTrue(line.startsWith("gemma infer complete ttftMs=250 inferenceMs="))
+        assertTrue(line.endsWith(" inputRate=512.50 outputRate=32.25 inputTokens=128 outputTokens=64"))
+        engine.close()
+    }
+
+    @Test
+    fun `successful inference still returns text when benchmark info is unavailable`() = runTest {
+        val logs = mutableListOf<String>()
+        val engine = engine(this, benchmarkInfo = { null }, log = logs::add)
+        engine.load(GemmaModel.E2B, File("model"))
+        val task = async { engine.summarize("/image", "ocr") }
+        runCurrent()
+        val message = mockk<Message>()
+        every { message.toString() } returns "ok"
+        callback.captured.onMessage(message)
+        callback.captured.onDone()
+        assertEquals("ok", task.await())
+        assertEquals(1, logs.size)
+        assertTrue(logs.single().startsWith("gemma infer complete inferenceMs="))
+        assertFalse(logs.single().contains("ttftMs="))
+        engine.close()
+    }
+
+    @Test
+    fun `cancelled inference does not log metrics`() = runTest {
+        val logs = mutableListOf<String>()
+        val engine = engine(this, log = logs::add)
+        engine.load(GemmaModel.E2B, File("model"))
+        val task = launch {
+            try {
+                engine.summarize("/image", "text")
+            } finally {
+                engine.close()
+            }
+        }
+        runCurrent()
+        task.cancel()
+        runCurrent()
+        callback.captured.onError(CancellationException("cancelled"))
+        task.join()
+        assertTrue(logs.isEmpty())
+    }
+
+    @Test
     fun `summarize passes stored conversation settings`() = runTest {
         val engine = engine(
             this,
@@ -175,6 +244,22 @@ class GemmaLlmEngineTest {
         }
         engine.load(GemmaModel.E2B, File("model"))
         assertEquals(listOf(false), flags)
+        verify(exactly = 1) { native.initialize() }
+        engine.close()
+    }
+
+    @Test
+    fun `load enables benchmark before initialize`() = runTest {
+        val flags = mutableListOf<Boolean>()
+        val engine = engine(
+            this,
+            setBenchmark = { flags += it },
+        )
+        every { native.initialize() } answers {
+            assertEquals(listOf(true), flags)
+        }
+        engine.load(GemmaModel.E2B, File("model"))
+        assertEquals(listOf(true), flags)
         verify(exactly = 1) { native.initialize() }
         engine.close()
     }

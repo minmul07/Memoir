@@ -29,8 +29,12 @@ import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.ImageThumbnail
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.analysisStatusText
+import minmul.memoir.core.design.component.EntityItem
+import minmul.memoir.core.design.component.EntityKind
+import minmul.memoir.core.design.component.EntitySection
 import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.model.AnalysisEntity
 import minmul.memoir.core.model.ItemDetail
 import minmul.memoir.core.model.JobStatus
 
@@ -81,15 +85,12 @@ fun ItemDetailScreen(
                     it.title ?: stringResource(R.string.archive_untitled),
                     style = MaterialTheme.typography.titleMedium,
                 )
-                it.summary?.let { summary ->
-                    Text(
-                        summary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
                 if (it.status != JobStatus.Succeeded) {
                     Text(analysisStatusText(it.status))
+                }
+                val entities = it.entityRows()
+                if (entities.isNotEmpty()) {
+                    EntitySection(entities = entities)
                 }
                 SelectionContainer {
                     Column {
@@ -136,9 +137,46 @@ private fun ItemDetailScreenPreview() {
                 ocrText = stringResource(R.string.preview_ocr_text),
                 createdAt = 1_725_926_400_000L,
                 title = stringResource(R.string.preview_analysis_title),
-                summary = stringResource(R.string.preview_analysis_summary),
                 detailedSummary = stringResource(R.string.preview_analysis_detailed),
+                time = listOf(
+                    AnalysisEntity(
+                        stringResource(R.string.preview_entity_time_name),
+                        stringResource(R.string.preview_entity_time_value),
+                    ),
+                ),
+                period = listOf(
+                    AnalysisEntity(
+                        stringResource(R.string.preview_entity_period_name),
+                        stringResource(R.string.preview_entity_period_value),
+                    ),
+                ),
+                location = listOf(
+                    AnalysisEntity(
+                        stringResource(R.string.preview_entity_location_name),
+                        stringResource(R.string.preview_entity_location_value),
+                    ),
+                ),
+                account = listOf(
+                    AnalysisEntity(
+                        stringResource(R.string.preview_entity_account_name),
+                        stringResource(R.string.preview_entity_account_value),
+                    ),
+                ),
+                phone = listOf(
+                    AnalysisEntity(
+                        stringResource(R.string.preview_entity_phone_name),
+                        stringResource(R.string.preview_entity_phone_value),
+                    ),
+                ),
             ),
         )
     }
+}
+
+private fun ItemDetail.entityRows(): List<EntityItem> = buildList {
+    time.forEach { add(EntityItem(EntityKind.Time, it.name, it.value)) }
+    period.forEach { add(EntityItem(EntityKind.Period, it.name, it.value)) }
+    location.forEach { add(EntityItem(EntityKind.Location, it.name, it.value)) }
+    account.forEach { add(EntityItem(EntityKind.Account, it.name, it.value)) }
+    phone.forEach { add(EntityItem(EntityKind.Phone, it.name, it.value)) }
 }

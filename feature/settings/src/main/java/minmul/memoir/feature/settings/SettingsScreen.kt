@@ -39,6 +39,7 @@ import minmul.memoir.core.model.AnalysisQueueMode
 fun SettingsScreen(
     onBack: () -> Unit,
     onOpenModelManagement: () -> Unit,
+    onOpenOpenSourceLicenses: () -> Unit,
     onOpenDeveloperOptions: () -> Unit,
     modifier: Modifier = Modifier,
     analysisQueueMode: AnalysisQueueMode = AnalysisQueueMode.Manual,
@@ -108,7 +109,7 @@ fun SettingsScreen(
             )
             NavigationItem(
                 title = stringResource(R.string.settings_open_source_licenses),
-                onClick = {},
+                onClick = onOpenOpenSourceLicenses,
             )
             NavigationItem(
                 title = stringResource(SettingsDestination.DeveloperOptions.labelRes),
@@ -188,6 +189,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             onBack = {},
             onOpenModelManagement = {},
+            onOpenOpenSourceLicenses = {},
             onOpenDeveloperOptions = {},
         )
     }

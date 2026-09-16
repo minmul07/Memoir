@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -25,12 +26,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import minmul.memoir.background.analysis.AnalysisService
 import minmul.memoir.core.design.R
+import minmul.memoir.core.design.component.MemoirFab
 import minmul.memoir.core.design.component.MemoirTopBar
 import minmul.memoir.feature.main.ArchiveRoute
 import minmul.memoir.feature.main.HomeScreen
@@ -81,6 +82,14 @@ fun MainScaffold(
             MemoirTopBar(
                 title = stringResource(selectedTab.labelRes),
                 actions = {
+                    if (selectedTab == MainTab.Queue) {
+                        IconButton(onClick = onOpenHistory) {
+                            Icon(
+                                imageVector = Icons.Filled.History,
+                                contentDescription = stringResource(R.string.nav_analysis_history),
+                            )
+                        }
+                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
@@ -92,18 +101,15 @@ fun MainScaffold(
         },
         floatingActionButton = {
             if (selectedTab == MainTab.Home) {
-                FloatingActionButton(
+                MemoirFab(
                     onClick = {
                         photoPicker.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                         )
                     },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.action_add_to_queue),
-                    )
-                }
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.action_add_to_queue),
+                )
             }
         },
         bottomBar = {
@@ -115,7 +121,7 @@ fun MainScaffold(
                         icon = {
                             when (tab) {
                                 MainTab.Archive -> Icon(
-                                    painter = painterResource(R.drawable.ic_nav_archive),
+                                    imageVector = Icons.Filled.Archive,
                                     contentDescription = stringResource(tab.labelRes),
                                 )
 
@@ -149,7 +155,6 @@ fun MainScaffold(
             )
 
             MainTab.Queue -> WorkQueueRoute(
-                onOpenHistory = onOpenHistory,
                 onOpenItem = onOpenItem,
                 onStart = { AnalysisService.start(context) },
                 serviceFailed = serviceFailed,

@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
+    implementation(libs.play.services.oss.licenses)
     ksp(libs.hilt.compiler)
     implementation(projects.core.design)
     implementation(projects.core.model)
