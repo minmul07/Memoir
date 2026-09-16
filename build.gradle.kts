@@ -8,4 +8,5 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.screenshot) apply false
     alias(libs.plugins.androidx.room3) apply false
+    alias(libs.plugins.oss.licenses) apply false
 }
