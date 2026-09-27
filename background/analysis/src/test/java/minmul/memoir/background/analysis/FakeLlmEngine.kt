@@ -47,4 +47,4 @@ class FakeLlmEngine(
     }
 }
 
-const val VALID_PAYLOAD = "title: T\n---\nD"
+const val VALID_PAYLOAD = "T\nD"

@@ -247,9 +247,9 @@ class AnalysisRunnerTest {
     }
 
     @Test
-    fun `invalid structured output fails the job without completing`() = runTest {
+    fun `blank title fails the job without completing`() = runTest {
         val repository = FakeAnalysisRepository(listOf("a"))
-        val raw = """{"summary":"legacy"}"""
+        val raw = "   "
         val llm = FakeLlmEngine { _, _ -> raw }
         val logs = mutableListOf<String>()
         analysisRunner(repository, successfulOcr(), llm, logs).drain()

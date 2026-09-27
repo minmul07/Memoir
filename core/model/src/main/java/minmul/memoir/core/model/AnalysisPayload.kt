@@ -43,7 +43,7 @@ data class AnalysisPayload(
     }
 
     enum class ParseFailure {
-        EMPTY, MISSING_TITLE, MISSING_DELIMITER, MISSING_ENTITY_NAME, ;
+        EMPTY, MISSING_TITLE, ;
 
         val logName: String = name.lowercase()
     }
@@ -69,44 +69,15 @@ data class AnalysisPayload(
 
         fun parseResult(raw: String): ParseResult {
             fun fail(reason: ParseFailure) = ParseResult.Failure(reason, raw.length)
-            val lines = raw.lines().dropWhile { it.isBlank() }
-            if (lines.isEmpty()) return fail(ParseFailure.EMPTY)
-            if (!hasLabel(lines[0], "title")) return fail(ParseFailure.MISSING_TITLE)
-            val title = valueAfterLabel(lines[0], "title").orEmpty()
+            val lines = raw.lines().dropWhile { it.isBlank() }.dropLastWhile { it.isBlank() }
+            if (lines.isEmpty()) {
+                val whitespaceTitle = raw.lineSequence().any { it.isNotEmpty() }
+                return fail(if (whitespaceTitle) ParseFailure.MISSING_TITLE else ParseFailure.EMPTY)
+            }
+            val title = lines.first().trim()
             if (title.isBlank()) return fail(ParseFailure.MISSING_TITLE)
-            var index = 1
-            if (index < lines.size && hasLabel(lines[index], "summary")) {
-                index++
-            }
-            if (index >= lines.size || lines[index].trim() != "---") {
-                return fail(ParseFailure.MISSING_DELIMITER)
-            }
-            val afterHeader = lines.drop(index + 1)
-            if (afterHeader.any(::isBareEntityLine)) {
-                return fail(ParseFailure.MISSING_ENTITY_NAME)
-            }
-            val split = splitEntities(afterHeader)
-            return ParseResult.Success(
-                AnalysisPayload(
-                    title,
-                    split.body,
-                    time = split.entities.time,
-                    period = split.entities.period,
-                    location = split.entities.location,
-                    account = split.entities.account,
-                    phone = split.entities.phone,
-                ),
-            )
-        }
-
-        private fun hasLabel(line: String, label: String): Boolean =
-            line.trimStart().startsWith("$label:", ignoreCase = true)
-
-        private fun valueAfterLabel(line: String, label: String): String? {
-            val trimmed = line.trimStart()
-            val prefix = "$label:"
-            if (!trimmed.startsWith(prefix, ignoreCase = true)) return null
-            return trimmed.substring(prefix.length).trim()
+            val body = lines.drop(1).joinToString("\n").trim()
+            return ParseResult.Success(AnalysisPayload(title, body))
         }
 
         private fun AnalysisPayload.withRecoveredEntities(): AnalysisPayload {
@@ -178,9 +149,6 @@ data class AnalysisPayload(
             return named.groupValues[1].lowercase() to AnalysisEntity(name, value)
         }
 
-        private fun isBareEntityLine(line: String): Boolean =
-            NAMED_ENTITY.matchEntire(line) == null && BARE_ENTITY.matchEntire(line) != null
-
         private fun jsonCandidate(raw: String): String {
             val trimmed = raw.trim()
             val fenced = FENCE.find(trimmed)?.groupValues?.get(1)?.trim()
@@ -234,11 +202,6 @@ data class AnalysisPayload(
 
         private val NAMED_ENTITY = Regex(
             """^\s*(time|period|location|account|phone)\(([^)]+)\)\s*:\s*(.*)$""",
-            RegexOption.IGNORE_CASE,
-        )
-
-        private val BARE_ENTITY = Regex(
-            """^\s*(time|period|location|account|phone)\s*:\s*(.*)$""",
             RegexOption.IGNORE_CASE,
         )
 
