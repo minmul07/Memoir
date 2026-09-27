@@ -161,8 +161,8 @@ class GemmaLlmEngineTest {
         callback.captured.onDone()
         task.await()
         val line = logs.single()
-        assertTrue(line.startsWith("gemma infer complete ttftMs=250 inferenceMs="))
-        assertTrue(line.endsWith(" inputRate=512.50 outputRate=32.25 inputTokens=128 outputTokens=64"))
+        assertTrue(line.startsWith("gemma infer complete ttftMs=250ms inferenceMs="))
+        assertTrue(line.endsWith(" inputRate=512.50tk/s outputRate=32.25tk/s inputTokens=128tks outputTokens=64tks"))
         engine.close()
     }
 

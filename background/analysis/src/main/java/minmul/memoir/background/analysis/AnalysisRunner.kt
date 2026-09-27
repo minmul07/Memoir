@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import minmul.memoir.core.ai.LlmEngine
 import minmul.memoir.core.ai.OcrEngine
+import minmul.memoir.core.model.AnalysisEntity
 import minmul.memoir.core.model.AnalysisPayload
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.data.content.AnalysisRepository
@@ -73,8 +74,8 @@ class AnalysisRunner(
                             stage = JobStage.Infer
                             repository.setStage(item.jobId, JobStage.Infer)
                             log("$context stage=infer begin")
-                            val summary =
-                                llm.summarize(imageFile(item.imagePath).absolutePath, text)
+                            val imagePath = imageFile(item.imagePath).absolutePath
+                            val summary = llm.summarize(imagePath, text)
                             val payload = when (val parsed = AnalysisPayload.parseResult(summary)) {
                                 is AnalysisPayload.ParseResult.Success -> parsed.payload
                                 is AnalysisPayload.ParseResult.Failure -> {
@@ -86,8 +87,12 @@ class AnalysisRunner(
                                     throw IllegalArgumentException("invalid_payload")
                                 }
                             }
-                            val encoded = payload.encoded()
-                            log("$context stage=infer complete payloadChars=${encoded.length}")
+                            stage = JobStage.Extract
+                            repository.setStage(item.jobId, JobStage.Extract)
+                            log("$context stage=extract begin")
+                            val entities = specialEntities(imagePath, text, context)
+                            val encoded = payload.copy(entities = entities).encoded()
+                            log("$context stage=extract complete payloadChars=${encoded.length}")
                             stage = JobStage.Saving
                             repository.setStage(item.jobId, JobStage.Saving)
                             log("$context stage=saving begin")
@@ -120,5 +125,27 @@ class AnalysisRunner(
             log("queue model_closed")
         }
         log("queue drain_end")
+    }
+
+    private suspend fun specialEntities(
+        imagePath: String,
+        ocrText: String?,
+        context: String,
+    ): List<AnalysisEntity> {
+        try {
+            return AnalysisPayload.parseSpecial(llm.extract(imagePath, ocrText))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            log("$context stage=extract failed error=${error.javaClass.simpleName} retry")
+            try {
+                return AnalysisPayload.parseSpecial(llm.extract(imagePath, ocrText))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (retryError: Exception) {
+                log("$context stage=extract failed error=${retryError.javaClass.simpleName} dropped")
+                return emptyList()
+            }
+        }
     }
 }

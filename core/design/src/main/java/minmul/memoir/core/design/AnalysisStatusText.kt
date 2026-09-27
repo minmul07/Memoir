@@ -23,6 +23,7 @@ fun analysisStatusText(
             status == JobStatus.Running -> when (stage) {
                 JobStage.Ocr -> R.string.analysis_ocr
                 JobStage.Infer -> R.string.queue_running
+                JobStage.Extract -> R.string.analysis_extract
                 JobStage.Saving -> R.string.analysis_saving
                 JobStage.Waiting -> R.string.queue_waiting
             }

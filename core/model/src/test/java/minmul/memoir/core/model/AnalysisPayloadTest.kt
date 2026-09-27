@@ -222,6 +222,42 @@ class AnalysisPayloadTest {
         assertEquals(emptyList<AnalysisEntity>(), payload?.phone)
     }
 
+    @Test
+    fun `parses special lines on the first colon`() {
+        assertEquals(
+            listOf(
+                AnalysisEntity("납부기한", "12월 5일"),
+                AnalysisEntity("시간", "12:30"),
+            ),
+            AnalysisPayload.parseSpecial(
+                """
+
+                납부기한: 12월 5일
+                메모
+                시간: 12:30
+                : 값
+                이름:
+                NULL
+                """.trimIndent(),
+            ),
+        )
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial("NULL"))
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial("\n  NULL  \n"))
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial(""))
+    }
+
+    @Test
+    fun `roundtrips a stored entities array`() {
+        val payload = AnalysisPayload.parse(
+            """{"title":"제목","detailed_summary":"본문","entities":[{"name":"납부기한","value":"12월 5일"}]}""",
+        )
+        assertEquals(listOf(AnalysisEntity("납부기한", "12월 5일")), payload?.entities)
+        assertEquals(
+            """{"title":"제목","detailed_summary":"본문","entities":[{"name":"납부기한","value":"12월 5일"}]}""",
+            payload?.encoded(),
+        )
+    }
+
     private fun success(raw: String): AnalysisPayload =
         (AnalysisPayload.parseResult(raw) as AnalysisPayload.ParseResult.Success).payload
 

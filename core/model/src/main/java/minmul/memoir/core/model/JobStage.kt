@@ -4,6 +4,7 @@ enum class JobStage(val storedValue: String) {
     Waiting("waiting"),
     Ocr("ocr"),
     Infer("infer"),
+    Extract("extract"),
     Saving("saving"),
     ;
 

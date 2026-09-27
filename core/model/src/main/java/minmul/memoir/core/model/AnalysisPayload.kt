@@ -23,6 +23,7 @@ data class AnalysisPayload(
     val location: List<AnalysisEntity> = emptyList(),
     val account: List<AnalysisEntity> = emptyList(),
     val phone: List<AnalysisEntity> = emptyList(),
+    val entities: List<AnalysisEntity> = emptyList(),
 ) {
     fun encoded(): String = buildJsonObject {
         put("title", title)
@@ -32,6 +33,7 @@ data class AnalysisPayload(
         putEntities("location", location)
         putEntities("account", account)
         putEntities("phone", phone)
+        putEntities("entities", entities)
     }.toString()
 
     sealed class ParseResult {
@@ -63,8 +65,25 @@ data class AnalysisPayload(
                 location = obj.entities("location"),
                 account = obj.entities("account"),
                 phone = obj.entities("phone"),
+                entities = obj.entities("entities"),
             )
             return parsed.withRecoveredEntities()
+        }
+
+        fun parseSpecial(raw: String): List<AnalysisEntity> {
+            val lines = raw.lines().dropWhile { it.isBlank() }.dropLastWhile { it.isBlank() }
+            if (lines.isEmpty() || lines.all { it.trim() == "NULL" }) return emptyList()
+            return lines.mapNotNull(::specialEntity)
+        }
+
+        private fun specialEntity(line: String): AnalysisEntity? {
+            if (line.trim() == "NULL") return null
+            val colon = line.indexOf(':')
+            if (colon < 0) return null
+            val name = line.substring(0, colon).trim()
+            val value = line.substring(colon + 1).trim()
+            if (name.isEmpty() || value.isEmpty()) return null
+            return AnalysisEntity(name, value)
         }
 
         fun parseResult(raw: String): ParseResult {
@@ -95,7 +114,8 @@ data class AnalysisPayload(
         }
 
         private val AnalysisPayload.hasEntities: Boolean
-            get() = time.isNotEmpty() ||
+            get() = entities.isNotEmpty() ||
+                    time.isNotEmpty() ||
                     period.isNotEmpty() ||
                     location.isNotEmpty() ||
                     account.isNotEmpty() ||

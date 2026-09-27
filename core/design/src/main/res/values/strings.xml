@@ -41,6 +41,7 @@
     <string name="entity_kind_account">계좌</string>
     <string name="entity_kind_phone">전화번호</string>
     <string name="entity_card_content_description">%1$s, %2$s, %3$s</string>
+    <string name="entity_card_content_description_plain">%1$s, %2$s</string>
     <string name="preview_entity_time_name">마감 시간</string>
     <string name="preview_entity_time_value">내일 오후 6시</string>
     <string name="preview_entity_period_name">행사 기간</string>
@@ -117,6 +118,7 @@
     <string name="queue_waiting">분석 대기 중</string>
     <string name="queue_running">분석 중</string>
     <string name="analysis_retrying">실패 - 재시도 중</string>
+    <string name="analysis_extract">중요한 정보 찾는 중</string>
     <string name="analysis_ocr">텍스트 읽는 중</string>
     <string name="analysis_saving">DB 저장 중</string>
     <string name="analysis_restart">분석 시작 / 재개</string>

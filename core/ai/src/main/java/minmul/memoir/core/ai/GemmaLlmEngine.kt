@@ -94,6 +94,12 @@ class GemmaLlmEngine internal constructor(
     }
 
     override suspend fun summarize(imagePath: String, ocrText: String?): String =
+        complete(imagePath, prompt(ocrText))
+
+    override suspend fun extract(imagePath: String, ocrText: String?): String =
+        complete(imagePath, extractPrompt(ocrText))
+
+    private suspend fun complete(imagePath: String, promptText: String): String =
         withContext(ioDispatcher) {
             val inference = settings()
             mutex.withLock {
@@ -105,7 +111,7 @@ class GemmaLlmEngine internal constructor(
                     conversation.sendMessageAsync(
                         Contents.of(
                             Content.ImageFile(imagePath),
-                            Content.Text(prompt(ocrText)),
+                            Content.Text(promptText),
                         ),
                         object : MessageCallback {
                             override fun onMessage(message: Message) {
@@ -160,6 +166,9 @@ class GemmaLlmEngine internal constructor(
 
     private fun prompt(ocrText: String?): String =
         "$SYSTEM_PROMPT_1_PASS\n\nOCR:\n${ocrText.orEmpty()}"
+
+    private fun extractPrompt(ocrText: String?): String =
+        "$SYSTEM_PROMPT_2_PASS\n\nOCR:\n${ocrText.orEmpty()}"
 
     private fun logInference(startedNs: Long, conversation: Conversation) {
         runCatching {
