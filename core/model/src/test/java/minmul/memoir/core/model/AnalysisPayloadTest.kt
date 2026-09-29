@@ -228,6 +228,7 @@ class AnalysisPayloadTest {
             listOf(
                 AnalysisEntity("납부기한", "12월 5일"),
                 AnalysisEntity("시간", "12:30"),
+                AnalysisEntity("Name", "유지"),
             ),
             AnalysisPayload.parseSpecial(
                 """
@@ -237,6 +238,9 @@ class AnalysisPayloadTest {
                 시간: 12:30
                 : 값
                 이름:
+                name: 납부기한
+                value: 12월 5일
+                Name: 유지
                 NULL
                 """.trimIndent(),
             ),

@@ -82,7 +82,7 @@ data class AnalysisPayload(
             if (colon < 0) return null
             val name = line.substring(0, colon).trim()
             val value = line.substring(colon + 1).trim()
-            if (name.isEmpty() || value.isEmpty()) return null
+            if (name.isEmpty() || value.isEmpty() || name == "name" || name == "value") return null
             return AnalysisEntity(name, value)
         }
 
