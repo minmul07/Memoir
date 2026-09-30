@@ -71,6 +71,7 @@ private fun DetailEntry.toModel(): ItemDetail {
         location = payload?.location.orEmpty(),
         account = payload?.account.orEmpty(),
         phone = payload?.phone.orEmpty(),
+        entities = payload?.entities.orEmpty(),
     )
 }
 

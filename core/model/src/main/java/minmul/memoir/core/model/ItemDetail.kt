@@ -13,4 +13,5 @@ data class ItemDetail(
     val location: List<AnalysisEntity> = emptyList(),
     val account: List<AnalysisEntity> = emptyList(),
     val phone: List<AnalysisEntity> = emptyList(),
+    val entities: List<AnalysisEntity> = emptyList(),
 )

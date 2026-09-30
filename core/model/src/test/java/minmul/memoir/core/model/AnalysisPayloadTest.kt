@@ -65,8 +65,7 @@ class AnalysisPayloadTest {
     fun `parses line format title and body`() {
         val payload = success(
             """
-            title: 회의
-            ---
+            회의
             - 자료 공유
             """.trimIndent(),
         )
@@ -78,91 +77,41 @@ class AnalysisPayloadTest {
     }
 
     @Test
-    fun `ignores leftover summary line before delimiter`() {
-        val leftover = success(
-            """
-            title: 회의
-            summary: 내일 10시
-            ---
-            - 자료 공유
-            """.trimIndent(),
-        )
-        assertEquals(AnalysisPayload("회의", "- 자료 공유"), leftover)
-        assertEquals(
-            """{"title":"회의","detailed_summary":"- 자료 공유"}""",
-            leftover.encoded(),
-        )
-
-        val blank = success(
-            """
-            title: 제목
-            summary:
-            ---
-            본문
-            """.trimIndent(),
-        )
-        assertEquals(AnalysisPayload("제목", "본문"), blank)
-
-        val whitespace = success(
-            """
-            title: 제목
-            summary:   
-            ---
-            본문
-            """.trimIndent(),
-        )
-        assertEquals(AnalysisPayload("제목", "본문"), whitespace)
+    fun `trims title line and body region edges`() {
+        val payload = success("\n  회의  \n\n  - 자료 공유\n\n  - 다음 줄\n\n")
+        assertEquals("회의", payload.title)
+        assertEquals("- 자료 공유\n\n  - 다음 줄", payload.detailedSummary)
+        assertEquals(emptyList<AnalysisEntity>(), payload.time)
     }
 
     @Test
-    fun `keeps markdown body after delimiter`() {
+    fun `keeps markdown body`() {
         val payload = success(
             """
-            TITLE: 제목
-            ---
+            제목
             ## 표
             | a | b |
+            ---
+            더 본문
             """.trimIndent(),
         )
         assertEquals("제목", payload.title)
-        assertEquals("## 표\n| a | b |", payload.detailedSummary)
+        assertEquals("## 표\n| a | b |\n---\n더 본문", payload.detailedSummary)
+        assertEquals(emptyList<AnalysisEntity>(), payload.time)
     }
 
     @Test
     fun `succeeds when body is empty`() {
-        assertEquals(
-            AnalysisPayload("제목", ""),
-            success(
-                """
-                title: 제목
-                ---
-                """.trimIndent(),
-            ),
-        )
+        assertEquals(AnalysisPayload("제목", ""), success("제목"))
+        assertEquals(AnalysisPayload("제목", ""), success("\n제목\n"))
     }
 
     @Test
     fun `classifies line format parse failures`() {
         assertFailure("", AnalysisPayload.ParseFailure.EMPTY)
-        assertFailure("not a title", AnalysisPayload.ParseFailure.MISSING_TITLE)
-        assertFailure("title:\n---\n본문", AnalysisPayload.ParseFailure.MISSING_TITLE)
-        assertFailure(
-            """
-            title: 제목
-            본문만
-            """.trimIndent(),
-            AnalysisPayload.ParseFailure.MISSING_DELIMITER,
-        )
-        assertFailure(
-            """
-            title: 영수증 정보
-            ---
-            time: 18:40
-            ---
-            영수금액: 47,400원
-            """.trimIndent(),
-            AnalysisPayload.ParseFailure.MISSING_ENTITY_NAME,
-        )
+        assertFailure("\n\n", AnalysisPayload.ParseFailure.EMPTY)
+        assertFailure("   ", AnalysisPayload.ParseFailure.MISSING_TITLE)
+        assertFailure("  \n", AnalysisPayload.ParseFailure.MISSING_TITLE)
     }
 
     @Test
@@ -172,11 +121,10 @@ class AnalysisPayloadTest {
     }
 
     @Test
-    fun `parses entity trailer after last delimiter`() {
+    fun `keeps entity-like lines in the body`() {
         val payload = success(
             """
-            title: 회의
-            ---
+            회의
             - 자료 공유
             ---
             time(마감 시간): 내일 오후 6시
@@ -187,61 +135,20 @@ class AnalysisPayloadTest {
             phone(대표번호): 02-123-4567
             """.trimIndent(),
         )
-        assertEquals("- 자료 공유", payload.detailedSummary)
-        assertEquals(listOf(AnalysisEntity("마감 시간", "내일 오후 6시")), payload.time)
-        assertEquals(listOf(AnalysisEntity("행사 기간", "9월 14일~16일")), payload.period)
-        assertEquals(listOf(AnalysisEntity("행사장", "강남역 2번 출구")), payload.location)
-        assertEquals(listOf(AnalysisEntity("입금 계좌", "123-456-789012")), payload.account)
         assertEquals(
-            listOf(
-                AnalysisEntity("전화번호", "010-1234-5678"),
-                AnalysisEntity("대표번호", "02-123-4567"),
-            ),
-            payload.phone,
+            "- 자료 공유\n---\n" +
+                    "time(마감 시간): 내일 오후 6시\n" +
+                    "period(행사 기간): 9월 14일~16일\n" +
+                    "location(행사장): 강남역 2번 출구\n" +
+                    "account(입금 계좌): 123-456-789012\n" +
+                    "phone(전화번호): 010-1234-5678\n" +
+                    "phone(대표번호): 02-123-4567",
+            payload.detailedSummary,
         )
-        assertEquals(
-            """{"title":"회의","detailed_summary":"- 자료 공유"""" +
-                    ""","time":[{"name":"마감 시간","value":"내일 오후 6시"}]""" +
-                    ""","period":[{"name":"행사 기간","value":"9월 14일~16일"}]""" +
-                    ""","location":[{"name":"행사장","value":"강남역 2번 출구"}]""" +
-                    ""","account":[{"name":"입금 계좌","value":"123-456-789012"}]""" +
-                    ""","phone":[{"name":"전화번호","value":"010-1234-5678"},{"name":"대표번호","value":"02-123-4567"}]}""",
-            payload.encoded(),
-        )
-    }
-
-    @Test
-    fun `keeps markdown delimiter in body when trailer has no allowed keys`() {
-        val payload = success(
-            """
-            title: 제목
-            ---
-            ## 표
-            ---
-            더 본문
-            """.trimIndent(),
-        )
-        assertEquals("## 표\n---\n더 본문", payload.detailedSummary)
         assertEquals(emptyList<AnalysisEntity>(), payload.time)
-        assertEquals(emptyList<AnalysisEntity>(), payload.phone)
-    }
-
-    @Test
-    fun `ignores unknown keys empty names and blank values in trailer`() {
-        val payload = success(
-            """
-            title: 제목
-            ---
-            본문
-            ---
-            url(링크): https://example.com
-            time(): 내일
-            phone(대표):
-            TIME(마감 시간): 내일 오후 6시
-            """.trimIndent(),
-        )
-        assertEquals("본문", payload.detailedSummary)
-        assertEquals(listOf(AnalysisEntity("마감 시간", "내일 오후 6시")), payload.time)
+        assertEquals(emptyList<AnalysisEntity>(), payload.period)
+        assertEquals(emptyList<AnalysisEntity>(), payload.location)
+        assertEquals(emptyList<AnalysisEntity>(), payload.account)
         assertEquals(emptyList<AnalysisEntity>(), payload.phone)
     }
 
@@ -290,17 +197,16 @@ class AnalysisPayloadTest {
     }
 
     @Test
-    fun `fails when entity key omits name`() {
-        assertFailure(
+    fun `keeps a bare entity line in the body`() {
+        val payload = success(
             """
-            title: 제목
-            ---
+            제목
             본문
-            ---
             time: 내일 오후 6시
             """.trimIndent(),
-            AnalysisPayload.ParseFailure.MISSING_ENTITY_NAME,
         )
+        assertEquals("본문\ntime: 내일 오후 6시", payload.detailedSummary)
+        assertEquals(emptyList<AnalysisEntity>(), payload.time)
     }
 
     @Test
@@ -314,6 +220,46 @@ class AnalysisPayloadTest {
         )
         assertEquals(emptyList<AnalysisEntity>(), payload?.time)
         assertEquals(emptyList<AnalysisEntity>(), payload?.phone)
+    }
+
+    @Test
+    fun `parses special lines on the first colon`() {
+        assertEquals(
+            listOf(
+                AnalysisEntity("납부기한", "12월 5일"),
+                AnalysisEntity("시간", "12:30"),
+                AnalysisEntity("Name", "유지"),
+            ),
+            AnalysisPayload.parseSpecial(
+                """
+
+                납부기한: 12월 5일
+                메모
+                시간: 12:30
+                : 값
+                이름:
+                name: 납부기한
+                value: 12월 5일
+                Name: 유지
+                NULL
+                """.trimIndent(),
+            ),
+        )
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial("NULL"))
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial("\n  NULL  \n"))
+        assertEquals(emptyList<AnalysisEntity>(), AnalysisPayload.parseSpecial(""))
+    }
+
+    @Test
+    fun `roundtrips a stored entities array`() {
+        val payload = AnalysisPayload.parse(
+            """{"title":"제목","detailed_summary":"본문","entities":[{"name":"납부기한","value":"12월 5일"}]}""",
+        )
+        assertEquals(listOf(AnalysisEntity("납부기한", "12월 5일")), payload?.entities)
+        assertEquals(
+            """{"title":"제목","detailed_summary":"본문","entities":[{"name":"납부기한","value":"12월 5일"}]}""",
+            payload?.encoded(),
+        )
     }
 
     private fun success(raw: String): AnalysisPayload =

@@ -1,28 +1,17 @@
 package minmul.memoir.core.design.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -41,7 +30,7 @@ enum class EntityKind {
 }
 
 data class EntityItem(
-    val kind: EntityKind,
+    val kind: EntityKind?,
     val name: String,
     val value: String,
 )
@@ -78,55 +67,45 @@ private fun EntityRow(
     entity: EntityItem,
     modifier: Modifier = Modifier,
 ) {
-    val kindLabel = stringResource(entity.kind.labelRes)
-    val description = stringResource(
-        R.string.entity_card_content_description,
-        kindLabel,
-        entity.name,
-        entity.value,
-    )
-    Row(
+    val kind = entity.kind
+    val description = if (kind == null) {
+        stringResource(
+            R.string.entity_card_content_description_plain,
+            entity.name,
+            entity.value,
+        )
+    } else {
+        stringResource(
+            R.string.entity_card_content_description,
+            stringResource(kind.labelRes),
+            entity.name,
+            entity.value,
+        )
+    }
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
                 contentDescription = description
             }
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(
-            imageVector = entity.kind.icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        Text(
+            text = entity.name,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entity.name,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = entity.value,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+        Text(
+            text = entity.value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
-
-private val EntityKind.icon: ImageVector
-    get() = when (this) {
-        EntityKind.Time -> Icons.Filled.Schedule
-        EntityKind.Period -> Icons.Filled.DateRange
-        EntityKind.Location -> Icons.Filled.Place
-        EntityKind.Account -> Icons.Filled.AccountBalance
-        EntityKind.Phone -> Icons.Filled.Phone
-    }
 
 private val EntityKind.labelRes: Int
     get() = when (this) {

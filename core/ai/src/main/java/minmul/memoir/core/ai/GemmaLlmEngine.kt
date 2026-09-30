@@ -94,6 +94,12 @@ class GemmaLlmEngine internal constructor(
     }
 
     override suspend fun summarize(imagePath: String, ocrText: String?): String =
+        complete(imagePath, prompt(ocrText))
+
+    override suspend fun extract(imagePath: String, ocrText: String?): String =
+        complete(imagePath, extractPrompt(ocrText))
+
+    private suspend fun complete(imagePath: String, promptText: String): String =
         withContext(ioDispatcher) {
             val inference = settings()
             mutex.withLock {
@@ -105,7 +111,7 @@ class GemmaLlmEngine internal constructor(
                     conversation.sendMessageAsync(
                         Contents.of(
                             Content.ImageFile(imagePath),
-                            Content.Text(prompt(ocrText)),
+                            Content.Text(promptText),
                         ),
                         object : MessageCallback {
                             override fun onMessage(message: Message) {
@@ -159,7 +165,10 @@ class GemmaLlmEngine internal constructor(
     }
 
     private fun prompt(ocrText: String?): String =
-        "$SYSTEM_PROMPT\n\nOCR:\n${ocrText.orEmpty()}"
+        "$SYSTEM_PROMPT_1_PASS\n\nOCR:\n${ocrText.orEmpty()}"
+
+    private fun extractPrompt(ocrText: String?): String =
+        "$SYSTEM_PROMPT_2_PASS\n\nOCR:\n${ocrText.orEmpty()}"
 
     private fun logInference(startedNs: Long, conversation: Conversation) {
         runCatching {
@@ -179,32 +188,29 @@ class GemmaLlmEngine internal constructor(
     )
 
     private companion object {
-        const val SYSTEM_PROMPT =
-            """당신은 스크린샷 분석기다. 한국어로 답한다.
+        const val SYSTEM_PROMPT_1_PASS =
+            """이미지와 OCR을 읽고 한국어로 답하세요.
 
-반드시 다음 형식으로 출력한다.
+반드시 아래 순서를 따르세요.
 
-title: 짧은 제목
----
-스크린샷의 중요한 정보를 빠짐없이 정리한 본문.
----
-특수 정보가 있으면 한 줄에 하나씩 출력한다.
-없으면 출력하지 않는다.
+첫 줄: 구체적인 제목 하나.
+다음 줄부터: 핵심 내용을 구체적으로 정리. 마크다운 문법 사용 가능."""
 
-허용 형식:
-time(name): value
-period(name): value
-location(name): value
-account(name): value
-phone(name): value
+        const val SYSTEM_PROMPT_2_PASS =
+            """스크린샷의 핵심 특수 정보만 추출하세요. 제목과 설명문은 다른 단계에서 작성하므로 여기에는 넣지 않습니다.
 
-규칙:
-- name은 반드시 작성한다.
-- 원문에 없는 정보는 추측하지 않는다.
-- 같은 정보를 중복하지 않는다.
-- 이미지와 OCR을 함께 사용한다.
-- OCR이 비어 있으면 이미지만 사용한다.
-- 특수 정보는 핵심 정보일 경우에만 사용한다."""
+다음 조건을 모두 만족하는 사실만 남기세요.
+1. 화면의 주된 일정, 구매, 결제, 송금, 방문 또는 연락에 직접 관련된다.
+2. 날짜·시각·기간, 실제 가격·거래금액, 방문 장소, 계좌·예약·연락 번호처럼 따로 복사하거나 확인할 구체적인 값이다.
+3. 이미지나 OCR에 실제 값과 그 의미가 확인된다.
+
+주된 일정의 시작·종료·마감, 실제 판매가·결제금액, 거래일시, 계좌번호는 누락하지 마세요. 0원도 실제 금액입니다. 이름·브랜드·상품 설명·상태·수량·평점·리뷰·제품 사양·적립 및 할부 광고·일반 약관은 본문에 맡기세요. 상태표시줄과 사업자 푸터도 제외합니다.
+계좌번호와 카드번호를 혼동하지 마세요. 일정과 무관한 구매일·승인번호를 모두 나열하지 마세요. 현재 가격과 취소선 가격을 구분하세요.
+여러 대상의 일시는 대상이 드러나게 이름을 붙입니다. 같은 사실은 한 번만 넣으세요. 핵심 값이 있는 화면에서는 이를 추출하고, 실제로 없을 때만 `NULL`을 출력하세요.
+항목명은 의미가 분명한 짧은 한국어로 자유롭게 정하세요. 값은 원문의 숫자·단위·날짜를 보존한 짧은 문자열입니다. 빈 값, 추측, 예시 값은 넣지 마세요. 각 줄로 구분된 `name: value` 쌍으로 결과만 반환하세요.
+
+
+출력은 각 줄마다 `name: value`입니다. name에는 속성명, value에는 그 실제 값을 넣으세요. `name`이나 `value`를 키로 사용하지 마세요. 예를 들어 "납부기한: 12월 5일"처럼 작성합니다. 이 예시의 값은 복사하지 마세요. 항목은 가장 중요한 것부터 최대 5개만 출력하세요. 추출할 정보가 없으면 `NULL`을 출력하세요."""
     }
 }
 

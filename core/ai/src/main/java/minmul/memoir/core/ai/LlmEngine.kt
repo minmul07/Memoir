@@ -11,5 +11,6 @@ interface LlmEngine {
     fun markMissing()
     suspend fun load(model: GemmaModel, file: File)
     suspend fun summarize(imagePath: String, ocrText: String?): String
+    suspend fun extract(imagePath: String, ocrText: String?): String
     suspend fun close()
 }

@@ -9,6 +9,7 @@ import java.io.File
 
 class FakeLlmEngine(
     private val loadError: Throwable? = null,
+    private val onExtract: suspend (imagePath: String, ocrText: String?) -> String = { _, _ -> "" },
     private val onSummarize: suspend (imagePath: String, ocrText: String?) -> String = { _, _ -> VALID_PAYLOAD },
 ) : LlmEngine {
     private val mutableStatus = MutableStateFlow<LlmRuntimeStatus>(LlmRuntimeStatus.Idle)
@@ -16,6 +17,7 @@ class FakeLlmEngine(
     var loadCalls = 0
     var closeCalls = 0
     val summarizeCalls = mutableListOf<Pair<String, String?>>()
+    val extractCalls = mutableListOf<Pair<String, String?>>()
 
     override fun markIdle() {
         mutableStatus.value = LlmRuntimeStatus.Idle
@@ -39,6 +41,11 @@ class FakeLlmEngine(
         return onSummarize(imagePath, ocrText)
     }
 
+    override suspend fun extract(imagePath: String, ocrText: String?): String {
+        extractCalls += imagePath to ocrText
+        return onExtract(imagePath, ocrText)
+    }
+
     override suspend fun close() {
         closeCalls++
         if (mutableStatus.value is LlmRuntimeStatus.Ready) {
@@ -47,4 +54,4 @@ class FakeLlmEngine(
     }
 }
 
-const val VALID_PAYLOAD = "title: T\n---\nD"
+const val VALID_PAYLOAD = "T\nD"

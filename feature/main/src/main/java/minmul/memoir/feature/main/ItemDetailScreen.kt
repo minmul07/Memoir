@@ -179,4 +179,5 @@ private fun ItemDetail.entityRows(): List<EntityItem> = buildList {
     location.forEach { add(EntityItem(EntityKind.Location, it.name, it.value)) }
     account.forEach { add(EntityItem(EntityKind.Account, it.name, it.value)) }
     phone.forEach { add(EntityItem(EntityKind.Phone, it.name, it.value)) }
+    entities.forEach { add(EntityItem(kind = null, name = it.name, value = it.value)) }
 }

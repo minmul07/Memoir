@@ -17,6 +17,7 @@ class FakeAnalysisRepository(ids: List<String>) : AnalysisRepository, ContentRep
     val jobs = MutableStateFlow(ids.map { QueueItem(it, it, it, JobStatus.Queued) })
     val completed = mutableListOf<String>()
     val payloads = mutableListOf<String>()
+    val stages = mutableListOf<JobStage>()
     override fun observeQueue() = jobs.map { rows ->
         rows.filter {
             it.status in listOf(
@@ -53,6 +54,7 @@ class FakeAnalysisRepository(ids: List<String>) : AnalysisRepository, ContentRep
     }
 
     override suspend fun setStage(jobId: String, stage: JobStage) {
+        stages += stage
         update(jobId) { it.copy(stage = stage) }
     }
 

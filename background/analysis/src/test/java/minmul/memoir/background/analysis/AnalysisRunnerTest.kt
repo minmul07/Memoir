@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import minmul.memoir.core.ai.OcrEngine
 import minmul.memoir.core.model.GemmaModel
+import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
 import minmul.memoir.core.model.LlmRuntimeStatus
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -247,9 +248,9 @@ class AnalysisRunnerTest {
     }
 
     @Test
-    fun `invalid structured output fails the job without completing`() = runTest {
+    fun `blank title fails the job without completing`() = runTest {
         val repository = FakeAnalysisRepository(listOf("a"))
-        val raw = """{"summary":"legacy"}"""
+        val raw = "   "
         val llm = FakeLlmEngine { _, _ -> raw }
         val logs = mutableListOf<String>()
         analysisRunner(repository, successfulOcr(), llm, logs).drain()
@@ -295,6 +296,60 @@ class AnalysisRunnerTest {
         assertEquals(listOf("b"), repository.completed)
         assertEquals(JobStatus.Cancelled, repository.jobs.value.first().status)
         assertEquals(1, llm.closeCalls)
+    }
+
+    @Test
+    fun `second pass stores name value entities after the summary`() = runTest {
+        val repository = FakeAnalysisRepository(listOf("a"))
+        val llm = FakeLlmEngine(
+            onExtract = { _, _ -> "납부기한: 12월 5일\n시간: 12:30\n메모\nNULL" },
+        )
+        analysisRunner(repository, successfulOcr(), llm).drain()
+        assertEquals(llm.summarizeCalls, llm.extractCalls)
+        assertEquals(
+            """{"title":"T","detailed_summary":"D","entities":[{"name":"납부기한","value":"12월 5일"},{"name":"시간","value":"12:30"}]}""",
+            repository.payloads.single(),
+        )
+        assertEquals(
+            listOf(JobStage.Infer, JobStage.Extract, JobStage.Saving),
+            repository.stages,
+        )
+    }
+
+    @Test
+    fun `second pass keeps entities from the retry`() = runTest {
+        val repository = FakeAnalysisRepository(listOf("a"))
+        var attempts = 0
+        val llm = FakeLlmEngine(onExtract = { _, _ ->
+            if (attempts++ == 0) error("extract")
+            "금액: 0원"
+        })
+        analysisRunner(repository, successfulOcr(), llm).drain()
+        assertEquals(2, llm.extractCalls.size)
+        assertEquals(
+            """{"title":"T","detailed_summary":"D","entities":[{"name":"금액","value":"0원"}]}""",
+            repository.payloads.single(),
+        )
+        assertEquals(JobStatus.Succeeded, repository.jobs.value.single().status)
+    }
+
+    @Test
+    fun `second pass saves the summary when both extracts fail`() = runTest {
+        val repository = FakeAnalysisRepository(listOf("a"))
+        val llm = FakeLlmEngine(onExtract = { _, _ -> error("extract") })
+        analysisRunner(repository, successfulOcr(), llm).drain()
+        assertEquals(2, llm.extractCalls.size)
+        assertEquals("""{"title":"T","detailed_summary":"D"}""", repository.payloads.single())
+        assertEquals(JobStatus.Succeeded, repository.jobs.value.single().status)
+    }
+
+    @Test
+    fun `blank second pass does not retry`() = runTest {
+        val repository = FakeAnalysisRepository(listOf("a"))
+        val llm = FakeLlmEngine(onExtract = { _, _ -> "NULL" })
+        analysisRunner(repository, successfulOcr(), llm).drain()
+        assertEquals(1, llm.extractCalls.size)
+        assertEquals("""{"title":"T","detailed_summary":"D"}""", repository.payloads.single())
     }
 
     private fun successfulOcr() = object : OcrEngine {
