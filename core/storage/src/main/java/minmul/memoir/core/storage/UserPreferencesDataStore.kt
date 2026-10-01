@@ -15,6 +15,7 @@ val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataS
 )
 
 object UserPreferencesKeys {
+    val INFORMATION_COLLECTION_ENABLED = booleanPreferencesKey("information_collection_enabled")
     val DISABLED_OCR_MODELS = stringSetPreferencesKey("disabled_ocr_models")
     val SELECTED_GEMMA_MODEL = stringPreferencesKey("selected_gemma_model")
     val GEMMA_MAX_OUTPUT_TOKEN = intPreferencesKey("gemma_max_output_token")

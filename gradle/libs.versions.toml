@@ -29,6 +29,7 @@ room3 = "3.0.3"
 sqlite = "2.7.1"
 timber = "5.0.1"
 litertlm = "0.17.1"
+firebaseBom = "34.19.0"
 
 [libraries]
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
@@ -78,6 +79,8 @@ play-services-mlkit-text-recognition-chinese = { group = "com.google.android.gms
 play-services-mlkit-text-recognition-devanagari = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-devanagari", version = "16.0.1" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

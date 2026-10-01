@@ -20,9 +20,19 @@ import javax.inject.Singleton
 class UserPreferencesRepository internal constructor(
     private val dataStore: DataStore<Preferences>,
 ) : OnboardingProgressStore, OcrModelPreferencesStore, GemmaModelPreferencesStore,
-    AnalysisQueueModeStore {
+    AnalysisQueueModeStore, InformationCollectionPreferencesStore {
     @Inject
     constructor(@ApplicationContext context: Context) : this(context.userPreferencesDataStore)
+
+    override val informationCollectionEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[UserPreferencesKeys.INFORMATION_COLLECTION_ENABLED] ?: true
+    }
+
+    override suspend fun setInformationCollectionEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[UserPreferencesKeys.INFORMATION_COLLECTION_ENABLED] = enabled
+        }
+    }
 
     override val disabledOcrModels: Flow<Set<OcrModel>> = dataStore.data.map { preferences ->
         val disabled = preferences[UserPreferencesKeys.DISABLED_OCR_MODELS].orEmpty()
