@@ -79,9 +79,12 @@
     <string name="settings_export">내보내기</string>
     <string name="settings_import">가져오기</string>
     <string name="settings_section_about">정보</string>
+    <string name="settings_crash_reports">비정상 종료 보고서</string>
+    <string name="settings_crash_reports_failed">비정상 종료 보고서 설정을 불러오거나 저장하지 못했습니다.</string>
     <string name="settings_app_info">앱 정보</string>
     <string name="settings_open_source_licenses">오픈소스 라이선스</string>
     <string name="developer_reset_onboarding">온보딩 진행도 초기화</string>
+    <string name="developer_test_crash">테스트 크래시</string>
 
     <string name="model_section_multimodal">멀티모달</string>
     <string name="model_gemma_4_e4b">Gemma 4 E4B</string>

@@ -25,7 +25,7 @@ class SettingsViewModelTest {
         val preferences = FakePreferences().apply {
             analysisQueueMode.value = AnalysisQueueMode.Immediate
         }
-        val viewModel = SettingsViewModel(preferences)
+        val viewModel = SettingsViewModel(preferences, FakeInformationCollectionPreferencesStore())
         try {
             advanceUntilIdle()
             assertEquals(AnalysisQueueMode.Immediate, viewModel.state.value.analysisQueueMode)
@@ -47,7 +47,7 @@ class SettingsViewModelTest {
     fun `write failure preserves the mode and exposes an error`() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val preferences = FakePreferences().apply { failWrites = true }
-        val viewModel = SettingsViewModel(preferences)
+        val viewModel = SettingsViewModel(preferences, FakeInformationCollectionPreferencesStore())
         try {
             advanceUntilIdle()
             viewModel.setAnalysisQueueMode(AnalysisQueueMode.Scheduled)

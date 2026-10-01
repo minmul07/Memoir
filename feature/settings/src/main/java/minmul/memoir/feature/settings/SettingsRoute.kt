@@ -28,6 +28,10 @@ fun SettingsRoute(
         analysisQueueModeLoaded = state.preferencesLoaded,
         analysisQueueModeFailed = state.preferencesFailed,
         onAnalysisQueueModeChange = viewModel::setAnalysisQueueMode,
+        informationCollectionEnabled = state.informationCollectionEnabled,
+        informationCollectionFailed = state.informationCollectionFailed,
+        informationCollectionSaving = state.informationCollectionSaving,
+        onInformationCollectionEnabledChange = viewModel::setInformationCollectionEnabled,
         onOpenModelManagement = onOpenModelManagement,
         onOpenOpenSourceLicenses = {
             OssLicensesMenuActivity.setActivityTitle(openSourceLicensesTitle)

@@ -28,6 +28,7 @@ fun DeveloperOptionsScreen(
     onDeleteAllItems: () -> Unit = {},
     busy: Boolean = false,
     failed: Boolean = false,
+    onTestCrash: () -> Unit = {},
 ) {
     var deletion by remember { mutableStateOf<Int?>(null) }
     StackScaffold(
@@ -39,6 +40,9 @@ fun DeveloperOptionsScreen(
         ListItem(onClick = onResetOnboarding) {
             Text(stringResource(R.string.developer_reset_onboarding))
         }
+            ListItem(onClick = onTestCrash) {
+                Text(stringResource(R.string.developer_test_crash))
+            }
         ListItem(onClick = { if (!busy) deletion = R.string.developer_delete_queue }) {
             Text(stringResource(R.string.developer_delete_queue))
         }

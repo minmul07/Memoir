@@ -32,6 +32,7 @@ import minmul.memoir.core.design.component.DialogItem
 import minmul.memoir.core.design.component.ItemSection
 import minmul.memoir.core.design.component.NavigationItem
 import minmul.memoir.core.design.component.StackScaffold
+import minmul.memoir.core.design.component.ToggleItem
 import minmul.memoir.core.design.theme.MemoirTheme
 import minmul.memoir.core.model.AnalysisQueueMode
 
@@ -46,6 +47,10 @@ fun SettingsScreen(
     analysisQueueModeLoaded: Boolean = true,
     analysisQueueModeFailed: Boolean = false,
     onAnalysisQueueModeChange: (AnalysisQueueMode) -> Unit = {},
+    informationCollectionEnabled: Boolean? = true,
+    informationCollectionFailed: Boolean = false,
+    informationCollectionSaving: Boolean = false,
+    onInformationCollectionEnabledChange: (Boolean) -> Unit = {},
 ) {
     var showAnalysisModeDialog by remember { mutableStateOf(false) }
     StackScaffold(
@@ -103,6 +108,19 @@ fun SettingsScreen(
             )
         }
         ItemSection(title = stringResource(R.string.settings_section_about)) {
+            ToggleItem(
+                title = stringResource(R.string.settings_crash_reports),
+                checked = informationCollectionEnabled ?: true,
+                enabled = informationCollectionEnabled != null && !informationCollectionSaving,
+                onCheckedChange = onInformationCollectionEnabledChange,
+            )
+            if (informationCollectionFailed) {
+                Text(
+                    stringResource(R.string.settings_crash_reports_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
             NavigationItem(
                 title = stringResource(R.string.settings_app_info),
                 onClick = {},

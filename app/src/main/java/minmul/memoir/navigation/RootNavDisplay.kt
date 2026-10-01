@@ -190,6 +190,7 @@ private fun SettingsStack(
             onResetOnboarding = onResetOnboarding,
             onDeleteQueue = actions::deleteQueue,
             onDeleteAllItems = actions::deleteAllItems,
+            onTestCrash = { throw IllegalStateException("Memoir test crash") },
             busy = busy,
             failed = actionFailed,
         )

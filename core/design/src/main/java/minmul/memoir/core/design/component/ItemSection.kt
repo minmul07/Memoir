@@ -76,13 +76,17 @@ fun ToggleItem(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     description: String? = null,
+    enabled: Boolean = true,
 ) {
     Column(
-        modifier = modifier.toggleable(
-            value = checked,
-            role = Role.Switch,
-            onValueChange = onCheckedChange,
-        ),
+        modifier = modifier
+            .alpha(if (enabled) 1f else 0.38f)
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            ),
     ) {
         ItemRow(
             title = title,
@@ -90,6 +94,7 @@ fun ToggleItem(
             trailing = {
                 Switch(
                     checked = checked,
+                    enabled = enabled,
                     onCheckedChange = null,
                     modifier = Modifier.clearAndSetSemantics {},
                 )
