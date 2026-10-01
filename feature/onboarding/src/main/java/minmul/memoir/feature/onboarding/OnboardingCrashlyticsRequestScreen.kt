@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -24,11 +22,13 @@ import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnboardingCrashlyticsRequestScreen(
     onContinue: () -> Unit,
+    onDisagree: () -> Unit,
     modifier: Modifier = Modifier,
+    isSaving: Boolean = false,
+    hasSaveError: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -36,30 +36,40 @@ fun OnboardingCrashlyticsRequestScreen(
             .systemBarsPadding()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
     ) {
         Text(
             text = stringResource(R.string.onboarding_crashlytics_title),
             style = MaterialTheme.typography.headlineMedium,
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         Text(
             text = stringResource(R.string.onboarding_crashlytics_body),
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(24.dp))
+        if (hasSaveError) {
+            Text(
+                text = stringResource(R.string.settings_crash_reports_failed),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             OutlinedButton(
-                onClick = onContinue,
+                onClick = onDisagree,
+                enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
                 Text(stringResource(R.string.action_disagree))
             }
             Button(
                 onClick = onContinue,
+                enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
                 Text(stringResource(R.string.action_agree))
@@ -72,6 +82,6 @@ fun OnboardingCrashlyticsRequestScreen(
 @Composable
 private fun OnboardingCrashlyticsRequestScreenPreview() {
     MemoirTheme {
-        OnboardingCrashlyticsRequestScreen(onContinue = {})
+        OnboardingCrashlyticsRequestScreen(onContinue = {}, onDisagree = {})
     }
 }

@@ -7,6 +7,8 @@
     <string name="action_done">완료</string>
     <string name="action_agree">동의</string>
     <string name="action_disagree">비동의</string>
+    <string name="action_request_permission">권한 요청</string>
+    <string name="action_later">나중에</string>
     <string name="action_delete">삭제</string>
     <string name="action_cancel">취소</string>
     <string name="action_cancel_analysis">분석 취소</string>
@@ -23,9 +25,12 @@
 
     <string name="onboarding_welcome">환영합니다</string>
     <string name="onboarding_permission_title">권한 안내</string>
-    <string name="onboarding_permission_body">사진 접근 권한이 필요합니다.</string>
+    <string name="onboarding_collection_info_action">무엇을 수집하나요?</string>
+    <string name="onboarding_collection_info_placeholder">추후 추가 예정</string>
+    <string name="onboarding_permission_body_1">Memoir 앱에서 기기의 이미지를 가져오려면 사진 권한이 필요합니다. 권한을 허용하시겠습니까?</string>
+    <string name="onboarding_permission_body_2">선택 사항입니다. 권한 비허용 시에는 외부 앱 공유하기를 통해 이미지 접근이 가능합니다.</string>
     <string name="onboarding_crashlytics_title">비정상 종료 보고서</string>
-    <string name="onboarding_crashlytics_body">오류 보고서를 보낼지 선택합니다.</string>
+    <string name="onboarding_crashlytics_body">앱 사용 중 문제가 발생했을 때 세부 정보를 개발자에게 보내 Memoir 개선에 기여할까요? 전송되는 항목에는 개인 정보가 포함되지 않습니다.</string>
     <string name="onboarding_model_setup_title">모델 설정</string>
 
     <string name="home_recent_section">최근 정리된 항목</string>

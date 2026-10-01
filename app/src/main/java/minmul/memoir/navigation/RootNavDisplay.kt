@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -59,6 +60,7 @@ fun RootNavDisplay(
         openQueue = openQueue,
         onOpenQueueConsumed = onOpenQueueConsumed,
         onAdvanceOnboarding = viewModel::setOnboardingProgress,
+        onDisagreeCrashlytics = viewModel::declineCrashlytics,
         onCompleteOnboarding = viewModel::completeOnboarding,
         onResetOnboarding = viewModel::resetOnboarding,
         modifier = modifier,
@@ -72,6 +74,7 @@ private fun RootNavDisplay(
     openQueue: Boolean,
     onOpenQueueConsumed: () -> Unit,
     onAdvanceOnboarding: suspend (Int) -> Unit,
+    onDisagreeCrashlytics: suspend () -> Boolean,
     onCompleteOnboarding: suspend () -> Unit,
     onResetOnboarding: suspend () -> Unit,
     modifier: Modifier = Modifier,
@@ -105,11 +108,28 @@ private fun RootNavDisplay(
         ),
         entryProvider = entryProvider {
             entry<Onboarding> {
+                var isSavingCrashlytics by remember { mutableStateOf(false) }
+                var hasCrashlyticsSaveError by rememberSaveable { mutableStateOf(false) }
                 OnboardingRoute(
                     progress = onboardingProgress,
                     onAdvance = { next ->
                         scope.launch { onAdvanceOnboarding(next) }
                     },
+                    onDisagreeCrashlytics = {
+                        if (!isSavingCrashlytics) {
+                            isSavingCrashlytics = true
+                            hasCrashlyticsSaveError = false
+                            scope.launch {
+                                try {
+                                    hasCrashlyticsSaveError = !onDisagreeCrashlytics()
+                                } finally {
+                                    isSavingCrashlytics = false
+                                }
+                            }
+                        }
+                    },
+                    isSavingCrashlytics = isSavingCrashlytics,
+                    hasCrashlyticsSaveError = hasCrashlyticsSaveError,
                     onComplete = {
                         scope.launch {
                             onCompleteOnboarding()
