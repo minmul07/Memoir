@@ -63,13 +63,19 @@ fun SettingsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        ItemSection(title = stringResource(R.string.settings_section_model)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_model),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             NavigationItem(
                 title = stringResource(SettingsDestination.ModelManagement.labelRes),
                 onClick = onOpenModelManagement,
             )
         }
-        ItemSection(title = stringResource(R.string.settings_section_user)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_user),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             DialogItem(
                 title = stringResource(R.string.settings_language),
                 onClick = {},
@@ -83,7 +89,10 @@ fun SettingsScreen(
                 onClick = {},
             )
         }
-        ItemSection(title = stringResource(R.string.settings_section_queue)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_queue),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             if (analysisQueueModeFailed) {
                 Text(
                     stringResource(R.string.settings_analysis_mode_failed),
@@ -97,7 +106,10 @@ fun SettingsScreen(
                 onClick = { if (analysisQueueModeLoaded) showAnalysisModeDialog = true },
             )
         }
-        ItemSection(title = stringResource(R.string.settings_section_data)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_data),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             NavigationItem(
                 title = stringResource(R.string.settings_export),
                 onClick = {},
@@ -107,7 +119,10 @@ fun SettingsScreen(
                 onClick = {},
             )
         }
-        ItemSection(title = stringResource(R.string.settings_section_about)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_about),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             ToggleItem(
                 title = stringResource(R.string.settings_crash_reports),
                 checked = informationCollectionEnabled ?: true,

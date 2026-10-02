@@ -50,12 +50,11 @@ fun ItemSection(
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+                .padding(top = 16.dp, bottom = 8.dp)
                 .semantics { heading() },
         )
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
@@ -312,7 +311,10 @@ private fun ItemSectionPreview() {
     var checked by remember { mutableStateOf(false) }
     var slider by remember { mutableFloatStateOf(0.5f) }
     MemoirTheme {
-        ItemSection(title = stringResource(R.string.settings_section_model)) {
+        ItemSection(
+            title = stringResource(R.string.settings_section_model),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
             ToggleItem(
                 title = stringResource(R.string.gemma_thinking),
                 description = stringResource(R.string.gemma_thinking_description),

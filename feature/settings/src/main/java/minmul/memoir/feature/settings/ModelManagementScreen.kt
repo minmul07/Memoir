@@ -83,7 +83,10 @@ fun ModelManagementScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            ItemSection(title = stringResource(R.string.model_section_multimodal)) {
+            ItemSection(
+                title = stringResource(R.string.model_section_multimodal),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
                 Text(
                     text = stringResource(R.string.gemma_models_policy),
                     style = MaterialTheme.typography.bodyMedium,
@@ -145,7 +148,10 @@ fun ModelManagementScreen(
                     onCheckedChange = { if (inferenceEditable) onSpeculativeDecodingChange(it) },
                 )
             }
-            ItemSection(title = stringResource(R.string.model_section_ocr)) {
+            ItemSection(
+                title = stringResource(R.string.model_section_ocr),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
                 Text(
                     text = stringResource(R.string.ocr_models_policy),
                     style = MaterialTheme.typography.bodyMedium,
@@ -174,7 +180,10 @@ fun ModelManagementScreen(
                     }
                 }
             }
-            ItemSection(title = stringResource(R.string.model_section_embedding)) {
+            ItemSection(
+                title = stringResource(R.string.model_section_embedding),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
                 NavigationItem(
                     title = stringResource(R.string.model_embedding_gemma),
                     onClick = {},
