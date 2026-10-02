@@ -62,15 +62,16 @@ class RootViewModelTest {
     }
 
     @Test
-    fun `completeOnboarding writes completed progress`() = runViewModelTest {
+    fun `completing model setup emits completed progress without resetting to landing`() =
+        runViewModelTest {
         val viewModel = RootViewModel(
-            FakeOnboardingProgressStore(),
+            FakeOnboardingProgressStore(OnboardingProgress.MODEL_SETUP),
             FakeInformationCollectionPreferencesStore()
         )
         advanceUntilIdle()
 
         viewModel.onboardingProgress.test {
-            awaitItem()
+            assertEquals(OnboardingProgress.MODEL_SETUP, awaitItem())
             viewModel.completeOnboarding()
             advanceUntilIdle()
             assertEquals(OnboardingProgress.COMPLETED, awaitItem())
