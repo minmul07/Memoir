@@ -28,7 +28,7 @@ fun OnboardingRoute(
             modifier = modifier,
         )
 
-        OnboardingProgress.MODEL_SETUP -> OnboardingModelSetupPage(
+        OnboardingProgress.MODEL_SETUP -> OnboardingModelSetupRoute(
             onComplete = onComplete,
             modifier = modifier,
         )

@@ -168,4 +168,8 @@
     <string name="ocr_model_disabled">설치 완료 · 비활성</string>
     <string name="ocr_model_enable_named">%1$s 모델 활성화</string>
     <string name="ocr_model_preferences_failed">모델 선택을 불러오거나 저장하지 못했습니다. 다시 시도하거나 새로고침해 주세요.</string>
+    <string name="onboarding_model_setup_body">내용을 분석할 모델을 준비해 주세요. 설치된 Gemma 모델 중 하나를 선택할 수 있습니다. 다운로드는 홈으로 이동한 뒤에도 계속되며, 모델 설정은 나중에 변경할 수 있습니다.</string>
+    <string name="onboarding_model_recommended">현재 언어의 권장 모델</string>
+    <string name="onboarding_model_already_installed">이미 설치됨</string>
+    <string name="onboarding_model_refresh_failed">모델 설치 상태를 확인하지 못했습니다. 새로고침해 주세요.</string>
 </resources>

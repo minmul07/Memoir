@@ -2,6 +2,7 @@ package minmul.memoir.data.model
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -66,6 +67,26 @@ class DefaultGemmaModelStoreTest {
         first.await()
         second.await()
         assertEquals(GemmaModelStatus.Ready, store.state(GemmaModel.E4B).status)
+    }
+
+    @Test
+    fun `download survives when its only screen waiter is cancelled`() = runTest {
+        val engine = FakeGemmaDownloadEngine()
+        val store = store(engine)
+        val screen = async { store.install(GemmaModel.E2B) }
+        runCurrent()
+        val id = engine.enqueuedId(GemmaModel.E2B)
+
+        screen.cancelAndJoin()
+        engine.set(id, GemmaDownloadStatus.Running, 42, 100)
+        runCurrent()
+        assertEquals(0.42f, store.state(GemmaModel.E2B).progress)
+        assertTrue(engine.removed.isEmpty())
+
+        engine.succeed(id)
+        runCurrent()
+        assertEquals(GemmaModelStatus.Ready, store.state(GemmaModel.E2B).status)
+        assertEquals(listOf(GemmaModel.E2B), engine.enqueued)
     }
 
     @Test

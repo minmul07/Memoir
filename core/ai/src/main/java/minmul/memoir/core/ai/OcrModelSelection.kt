@@ -4,7 +4,7 @@ import minmul.memoir.core.model.OcrModel
 import minmul.memoir.core.model.OcrModelStatus
 import java.util.Locale
 
-internal fun defaultOcrModel(locale: Locale): OcrModel = when (locale.script) {
+fun defaultOcrModel(locale: Locale): OcrModel = when (locale.script) {
     "Kore", "Hang" -> OcrModel.Korean
     "Jpan", "Hira", "Kana" -> OcrModel.Japanese
     "Hans", "Hant", "Hani" -> OcrModel.Chinese
