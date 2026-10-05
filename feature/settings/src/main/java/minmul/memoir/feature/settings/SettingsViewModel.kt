@@ -16,6 +16,8 @@ import minmul.memoir.core.ai.AnalysisLog
 import minmul.memoir.core.model.AnalysisQueueMode
 import minmul.memoir.data.preferences.AnalysisQueueModeStore
 import minmul.memoir.data.preferences.InformationCollectionPreferencesStore
+import minmul.memoir.data.preferences.InformationCollectionReadState
+import minmul.memoir.data.preferences.InformationCollectionState
 import javax.inject.Inject
 
 data class SettingsUiState(
@@ -34,11 +36,6 @@ private data class AnalysisQueueModeSelection(
     val failed: Boolean = false,
 )
 
-private data class InformationCollectionSelection(
-    val enabled: Boolean? = null,
-    val failed: Boolean = false,
-)
-
 private data class InformationCollectionWriteState(
     val saving: Boolean = false,
     val failed: Boolean = false,
@@ -48,6 +45,7 @@ private data class InformationCollectionWriteState(
 class SettingsViewModel @Inject constructor(
     private val preferences: AnalysisQueueModeStore,
     private val informationCollectionPreferences: InformationCollectionPreferencesStore,
+    informationCollectionState: InformationCollectionState,
 ) : ViewModel() {
     private val saving = MutableStateFlow(false)
     private val saveFailed = MutableStateFlow(false)
@@ -60,14 +58,7 @@ class SettingsViewModel @Inject constructor(
         }
     private val informationCollectionWriteState =
         MutableStateFlow(InformationCollectionWriteState())
-    private val informationCollectionSelection =
-        informationCollectionPreferences.informationCollectionEnabled
-            .map { InformationCollectionSelection(enabled = it) }
-            .onStart { emit(InformationCollectionSelection()) }
-            .catch {
-                AnalysisLog.write("settings information_collection preferences_failed error=${it.javaClass.simpleName}")
-                emit(InformationCollectionSelection(failed = true))
-            }
+    private val informationCollectionSelection = informationCollectionState.state
     val state = combine(
         selection,
         saving,
@@ -81,10 +72,17 @@ class SettingsViewModel @Inject constructor(
             preferencesFailed = selection.failed || failed,
             saving = saving,
             informationCollectionEnabled = collection.enabled,
-            informationCollectionFailed = collection.failed || collectionWrite.failed,
+            informationCollectionFailed = (collection is InformationCollectionReadState.Failed) || collectionWrite.failed,
             informationCollectionSaving = collectionWrite.saving,
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsUiState())
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        SettingsUiState(
+            informationCollectionEnabled = informationCollectionSelection.value.enabled,
+            informationCollectionFailed = informationCollectionSelection.value is InformationCollectionReadState.Failed,
+        ),
+    )
 
     fun setInformationCollectionEnabled(enabled: Boolean) {
         val current = state.value.informationCollectionEnabled ?: return

@@ -39,6 +39,19 @@ class InformationCollectionPreferencesTest {
         }
     }
 
+    @Test
+    fun `shared state reads the default from an empty datastore`() = runTest {
+        withRepository(File(directory, "shared-default.preferences_pb")) { repository ->
+            val state = InformationCollectionState(repository)
+            state.start(backgroundScope)
+
+            assertEquals(
+                true,
+                state.state.first { it is InformationCollectionReadState.Ready }.enabled
+            )
+        }
+    }
+
     private suspend fun withRepository(
         file: File,
         block: suspend (UserPreferencesRepository) -> Unit,

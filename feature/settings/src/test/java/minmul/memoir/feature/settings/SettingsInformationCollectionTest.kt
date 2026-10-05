@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
@@ -11,10 +12,12 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import minmul.memoir.core.model.AnalysisQueueMode
 import minmul.memoir.data.preferences.AnalysisQueueModeStore
+import minmul.memoir.data.preferences.InformationCollectionState
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -109,6 +112,41 @@ class SettingsInformationCollectionTest {
         }
     }
 
+    @Test
+    fun `preloaded collection value is immediate even while analysis preferences are loading`() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val preferences = FakeInformationCollectionPreferencesStore(false)
+            val collectionState = InformationCollectionState(preferences)
+            collectionState.start(backgroundScope)
+            runCurrent()
+            val analysisPreferences = object : AnalysisQueueModeStore {
+                override val analysisQueueMode = flow<AnalysisQueueMode> { awaitCancellation() }
+                override suspend fun setAnalysisQueueMode(mode: AnalysisQueueMode) = Unit
+            }
+            val first = SettingsViewModel(analysisPreferences, preferences, collectionState)
+            try {
+                assertEquals(false, first.state.value.informationCollectionEnabled)
+                assertFalse(first.state.value.preferencesLoaded)
+                advanceUntilIdle()
+                assertEquals(false, first.state.value.informationCollectionEnabled)
+                first.viewModelScope.cancel()
+
+                preferences.setInformationCollectionEnabled(true)
+                runCurrent()
+                val reopened = SettingsViewModel(analysisPreferences, preferences, collectionState)
+                try {
+                    assertEquals(true, reopened.state.value.informationCollectionEnabled)
+                    assertFalse(reopened.state.value.preferencesLoaded)
+                } finally {
+                    reopened.viewModelScope.cancel()
+                }
+            } finally {
+                first.viewModelScope.cancel()
+                Dispatchers.resetMain()
+            }
+        }
+
     private fun withViewModel(
         preferences: FakeInformationCollectionPreferencesStore,
         body: suspend TestScope.(SettingsViewModel) -> Unit,
@@ -120,7 +158,9 @@ class SettingsInformationCollectionTest {
                 analysisQueueMode.value = mode
             }
         }
-        val viewModel = SettingsViewModel(analysisPreferences, preferences)
+        val collectionState = InformationCollectionState(preferences)
+        val viewModel = SettingsViewModel(analysisPreferences, preferences, collectionState)
+        collectionState.start(viewModel.viewModelScope)
         try {
             body(viewModel)
         } finally {

@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import minmul.memoir.core.model.AnalysisQueueMode
 import minmul.memoir.data.preferences.AnalysisQueueModeStore
+import minmul.memoir.data.preferences.InformationCollectionState
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,7 +26,10 @@ class SettingsViewModelTest {
         val preferences = FakePreferences().apply {
             analysisQueueMode.value = AnalysisQueueMode.Immediate
         }
-        val viewModel = SettingsViewModel(preferences, FakeInformationCollectionPreferencesStore())
+        val collectionPreferences = FakeInformationCollectionPreferencesStore()
+        val collectionState = InformationCollectionState(collectionPreferences)
+        val viewModel = SettingsViewModel(preferences, collectionPreferences, collectionState)
+        collectionState.start(viewModel.viewModelScope)
         try {
             advanceUntilIdle()
             assertEquals(AnalysisQueueMode.Immediate, viewModel.state.value.analysisQueueMode)
@@ -47,7 +51,10 @@ class SettingsViewModelTest {
     fun `write failure preserves the mode and exposes an error`() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val preferences = FakePreferences().apply { failWrites = true }
-        val viewModel = SettingsViewModel(preferences, FakeInformationCollectionPreferencesStore())
+        val collectionPreferences = FakeInformationCollectionPreferencesStore()
+        val collectionState = InformationCollectionState(collectionPreferences)
+        val viewModel = SettingsViewModel(preferences, collectionPreferences, collectionState)
+        collectionState.start(viewModel.viewModelScope)
         try {
             advanceUntilIdle()
             viewModel.setAnalysisQueueMode(AnalysisQueueMode.Scheduled)

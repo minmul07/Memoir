@@ -47,7 +47,7 @@ fun SettingsScreen(
     analysisQueueModeLoaded: Boolean = true,
     analysisQueueModeFailed: Boolean = false,
     onAnalysisQueueModeChange: (AnalysisQueueMode) -> Unit = {},
-    informationCollectionEnabled: Boolean? = true,
+    informationCollectionEnabled: Boolean? = null,
     informationCollectionFailed: Boolean = false,
     informationCollectionSaving: Boolean = false,
     onInformationCollectionEnabledChange: (Boolean) -> Unit = {},
@@ -125,9 +125,12 @@ fun SettingsScreen(
         ) {
             ToggleItem(
                 title = stringResource(R.string.settings_crash_reports),
-                checked = informationCollectionEnabled ?: true,
-                enabled = informationCollectionEnabled != null && !informationCollectionSaving,
-                onCheckedChange = onInformationCollectionEnabledChange,
+                checked = informationCollectionEnabled ?: false,
+                onCheckedChange = { enabled ->
+                    if (informationCollectionEnabled != null && !informationCollectionSaving) {
+                        onInformationCollectionEnabledChange(enabled)
+                    }
+                },
             )
             if (informationCollectionFailed) {
                 Text(

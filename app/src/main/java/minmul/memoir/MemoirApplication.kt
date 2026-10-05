@@ -6,7 +6,10 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import minmul.memoir.data.preferences.InformationCollectionReadState
+import minmul.memoir.data.preferences.InformationCollectionState
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -22,8 +25,19 @@ class MemoirApplication : Application() {
         if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
             Timber.plant(Timber.DebugTree())
         }
+        informationCollectionState.start(applicationScope)
         applicationScope.launch {
-            informationCollectionState.load()
+            when (val result = informationCollectionState.state.first {
+                it !is InformationCollectionReadState.Loading
+            }) {
+                is InformationCollectionReadState.Ready -> Timber.tag("MemoirStartup")
+                    .i("information_collection_enabled=%s", result.enabled)
+
+                is InformationCollectionReadState.Failed -> Timber.tag("MemoirStartup")
+                    .e(result.cause, "Failed to load information collection preference")
+
+                InformationCollectionReadState.Loading -> Unit
+            }
         }
     }
 }
