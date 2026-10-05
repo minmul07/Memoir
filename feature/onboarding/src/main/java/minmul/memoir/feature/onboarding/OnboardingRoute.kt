@@ -7,6 +7,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import minmul.memoir.data.preferences.OnboardingProgress
@@ -21,14 +24,18 @@ fun OnboardingRoute(
     isSavingCrashlytics: Boolean = false,
     hasCrashlyticsSaveError: Boolean = false,
 ) {
-    AnimatedContent(
-        targetState = if (progress == OnboardingProgress.COMPLETED) {
-            OnboardingProgress.MODEL_SETUP
-        } else {
-            progress
-        },
-        modifier = modifier,
-        transitionSpec = {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        AnimatedContent(
+            targetState = if (progress == OnboardingProgress.COMPLETED) {
+                OnboardingProgress.MODEL_SETUP
+            } else {
+                progress
+            },
+            modifier = Modifier.fillMaxSize(),
+            transitionSpec = {
             (slideInHorizontally(
                 animationSpec = tween(250),
                 initialOffsetX = { it / 6 },
@@ -59,6 +66,7 @@ fun OnboardingRoute(
             else -> LandingScreen(
                 onContinue = { onAdvance(OnboardingProgress.PERMISSION) },
             )
+        }
         }
     }
 }
