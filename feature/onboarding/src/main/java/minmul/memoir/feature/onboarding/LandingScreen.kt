@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 @Composable
 fun LandingScreen(
@@ -34,11 +34,14 @@ fun LandingScreen(
     ) {
         Text(
             text = stringResource(R.string.onboarding_welcome),
-            style = MaterialTheme.typography.headlineMedium,
+            style = MemoirTypography.headlineMedium,
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = onContinue) {
-            Text(stringResource(R.string.action_continue))
+            Text(
+                stringResource(R.string.action_continue),
+                style = MemoirTypography.labelLarge,
+            )
         }
     }
 }

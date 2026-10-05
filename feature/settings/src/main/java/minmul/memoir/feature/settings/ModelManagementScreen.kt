@@ -33,6 +33,7 @@ import minmul.memoir.core.design.component.OcrModelRow
 import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.component.ToggleItem
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.GemmaInferenceSettings
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
@@ -89,7 +90,7 @@ fun ModelManagementScreen(
             ) {
                 Text(
                     text = stringResource(R.string.gemma_models_policy),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MemoirTypography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 if (gemmaPreferencesFailed) {
@@ -154,14 +155,19 @@ fun ModelManagementScreen(
             ) {
                 Text(
                     text = stringResource(R.string.ocr_models_policy),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MemoirTypography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 TextButton(
                     onClick = onRefreshOcr,
                     enabled = ocrModels.none { it.status == OcrModelStatus.Checking },
                     modifier = Modifier.padding(horizontal = 8.dp),
-                ) { Text(stringResource(R.string.ocr_models_refresh)) }
+                ) {
+                    Text(
+                        stringResource(R.string.ocr_models_refresh),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
                 if (preferencesFailed) {
                     Text(
                         stringResource(R.string.ocr_model_preferences_failed),
@@ -204,11 +210,19 @@ fun ModelManagementScreen(
                         deleteConfirm = null
                         onDeleteGemma(pendingDelete)
                     },
-                ) { Text(stringResource(R.string.action_delete)) }
+                ) {
+                    Text(
+                        stringResource(R.string.action_delete),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
             },
             dismissButton = {
                 TextButton(onClick = { deleteConfirm = null }) {
-                    Text(stringResource(R.string.action_cancel))
+                    Text(
+                        stringResource(R.string.action_cancel),
+                        style = MemoirTypography.labelLarge,
+                    )
                 }
             },
         )
@@ -317,11 +331,19 @@ private fun InferenceSliderDialog(
                     onConfirm(draft)
                     onDismiss()
                 },
-            ) { Text(stringResource(R.string.action_done)) }
+            ) {
+                Text(
+                    stringResource(R.string.action_done),
+                    style = MemoirTypography.labelLarge,
+                )
+            }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
+                Text(
+                    stringResource(R.string.action_cancel),
+                    style = MemoirTypography.labelLarge,
+                )
             }
         },
     )

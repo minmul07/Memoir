@@ -287,7 +287,7 @@ fun MemoirTheme(
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         motionScheme = MotionScheme.expressive(),
-        typography = Typography,
+        typography = MemoirTypography,
         content = content,
     )
 }

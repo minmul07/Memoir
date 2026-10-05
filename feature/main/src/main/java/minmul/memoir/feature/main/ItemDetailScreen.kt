@@ -14,7 +14,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import minmul.memoir.core.design.component.EntityKind
 import minmul.memoir.core.design.component.EntitySection
 import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.AnalysisEntity
 import minmul.memoir.core.model.ItemDetail
 import minmul.memoir.core.model.JobStatus
@@ -83,7 +83,7 @@ fun ItemDetailScreen(
                 )
                 Text(
                     it.title ?: stringResource(R.string.archive_untitled),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MemoirTypography.titleMedium,
                 )
                 if (it.status != JobStatus.Succeeded) {
                     Text(analysisStatusText(it.status))
@@ -110,12 +110,18 @@ fun ItemDetailScreen(
             text = { Text(stringResource(R.string.item_delete_confirmation)) },
             confirmButton = {
                 TextButton(onClick = { confirmDelete = false; onDelete() }) {
-                    Text(stringResource(R.string.action_delete))
+                    Text(
+                        stringResource(R.string.action_delete),
+                        style = MemoirTypography.labelLarge,
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDelete = false }) {
-                    Text(stringResource(R.string.action_cancel))
+                    Text(
+                        stringResource(R.string.action_cancel),
+                        style = MemoirTypography.labelLarge,
+                    )
                 }
             },
         )

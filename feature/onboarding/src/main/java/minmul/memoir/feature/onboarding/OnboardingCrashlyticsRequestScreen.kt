@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 @Composable
 fun OnboardingCrashlyticsRequestScreen(
@@ -40,19 +41,19 @@ fun OnboardingCrashlyticsRequestScreen(
     ) {
         Text(
             text = stringResource(R.string.onboarding_crashlytics_title),
-            style = MaterialTheme.typography.headlineMedium,
+            style = MemoirTypography.headlineMedium,
         )
         Spacer(modifier = Modifier.height(36.dp))
         Text(
             text = stringResource(R.string.onboarding_crashlytics_body),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MemoirTypography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(24.dp))
         if (hasSaveError) {
             Text(
                 text = stringResource(R.string.settings_crash_reports_failed),
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MemoirTypography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -65,14 +66,20 @@ fun OnboardingCrashlyticsRequestScreen(
                 enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(stringResource(R.string.action_disagree))
+                Text(
+                    stringResource(R.string.action_disagree),
+                    style = MemoirTypography.labelLarge,
+                )
             }
             Button(
                 onClick = onContinue,
                 enabled = !isSaving,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(stringResource(R.string.action_agree))
+                Text(
+                    stringResource(R.string.action_agree),
+                    style = MemoirTypography.labelLarge,
+                )
             }
         }
     }

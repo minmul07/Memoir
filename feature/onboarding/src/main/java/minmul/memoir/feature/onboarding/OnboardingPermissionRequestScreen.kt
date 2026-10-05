@@ -32,6 +32,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 @Composable
 fun OnboardingPermissionRequestScreen(
@@ -52,17 +53,17 @@ fun OnboardingPermissionRequestScreen(
     ) {
         Text(
             text = stringResource(R.string.onboarding_permission_title),
-            style = MaterialTheme.typography.headlineMedium,
+            style = MemoirTypography.headlineMedium,
         )
         Spacer(modifier = Modifier.height(36.dp))
         Text(
             text = stringResource(R.string.onboarding_permission_body_1),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MemoirTypography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(R.string.onboarding_permission_body_2),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MemoirTypography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -73,7 +74,7 @@ fun OnboardingPermissionRequestScreen(
                 indication = null,
                 role = Role.Button,
             ) { showCollectionInfo = true },
-            style = MaterialTheme.typography.bodySmall,
+            style = MemoirTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
             textDecoration = TextDecoration.Underline,
         )
@@ -87,14 +88,20 @@ fun OnboardingPermissionRequestScreen(
                 enabled = buttonsEnabled,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(stringResource(R.string.action_later))
+                Text(
+                    stringResource(R.string.action_later),
+                    style = MemoirTypography.labelLarge,
+                )
             }
             Button(
                 onClick = onRequestPermission,
                 enabled = buttonsEnabled,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(stringResource(R.string.action_request_permission))
+                Text(
+                    stringResource(R.string.action_request_permission),
+                    style = MemoirTypography.labelLarge,
+                )
             }
         }
     }
@@ -119,7 +126,7 @@ fun OnboardingPermissionRequestScreen(
                 Text(
                     text = stringResource(R.string.onboarding_collection_info_placeholder),
                     modifier = Modifier.padding(24.dp),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MemoirTypography.bodyMedium,
                 )
             }
         }

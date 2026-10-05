@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 enum class EntityKind {
     Time,
@@ -92,14 +93,14 @@ private fun EntityRow(
     ) {
         Text(
             text = entity.name,
-            style = MaterialTheme.typography.labelMedium,
+            style = MemoirTypography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Text(
             text = entity.value,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MemoirTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

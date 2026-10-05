@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
 import minmul.memoir.core.model.GemmaModelStatus
@@ -97,7 +98,12 @@ fun GemmaModelRow(
                                     modifier = Modifier.semantics {
                                         contentDescription = deleteLabel
                                     },
-                                ) { Text(stringResource(R.string.action_delete)) }
+                                ) {
+                                    Text(
+                                        stringResource(R.string.action_delete),
+                                        style = MemoirTypography.labelLarge,
+                                    )
+                                }
                             }
                             RadioButton(
                                 selected = state.selected,
@@ -112,14 +118,24 @@ fun GemmaModelRow(
                         TextButton(
                             onClick = onCancel,
                             modifier = Modifier.semantics { contentDescription = cancelLabel },
-                        ) { Text(stringResource(R.string.action_cancel)) }
+                        ) {
+                            Text(
+                                stringResource(R.string.action_cancel),
+                                style = MemoirTypography.labelLarge,
+                            )
+                        }
                     }
 
                     state.status == GemmaModelStatus.Missing || state.status == GemmaModelStatus.Failed -> {
                         TextButton(
                             onClick = onInstall,
                             modifier = Modifier.semantics { contentDescription = downloadLabel },
-                        ) { Text(stringResource(R.string.ocr_model_download)) }
+                        ) {
+                            Text(
+                                stringResource(R.string.ocr_model_download),
+                                style = MemoirTypography.labelLarge,
+                            )
+                        }
                     }
                 }
             },
@@ -208,7 +224,12 @@ fun OcrModelRow(
                     TextButton(
                         onClick = onInstall,
                         modifier = Modifier.semantics { contentDescription = downloadLabel },
-                    ) { Text(stringResource(R.string.ocr_model_download)) }
+                    ) {
+                        Text(
+                            stringResource(R.string.ocr_model_download),
+                            style = MemoirTypography.labelLarge,
+                        )
+                    }
                 }
             },
         ) {

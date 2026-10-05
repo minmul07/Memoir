@@ -29,7 +29,7 @@ private val NotoSansKr = FontFamily(
     ),
 )
 
-val Typography = Typography(
+val MemoirTypography = Typography(
     displayLarge = textStyle(FontWeight.Bold, 57, 64),
     displayMedium = textStyle(FontWeight.Bold, 45, 52),
     displaySmall = textStyle(FontWeight.Bold, 36, 44),

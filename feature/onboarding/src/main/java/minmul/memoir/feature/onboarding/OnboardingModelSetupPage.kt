@@ -27,6 +27,7 @@ import minmul.memoir.core.design.component.GemmaModelRow
 import minmul.memoir.core.design.component.ItemSection
 import minmul.memoir.core.design.component.OcrModelRow
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.GemmaModelState
 import minmul.memoir.core.model.GemmaModelStatus
@@ -67,12 +68,12 @@ fun OnboardingModelSetupPage(
         ) {
             Text(
                 text = stringResource(R.string.onboarding_model_setup_title),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MemoirTypography.headlineMedium,
             )
             Spacer(modifier = Modifier.height(36.dp))
             Text(
                 text = stringResource(R.string.onboarding_model_setup_body),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MemoirTypography.bodyLarge,
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (preferencesFailed || refreshFailed) {
@@ -82,7 +83,7 @@ fun OnboardingModelSetupPage(
                         else R.string.onboarding_model_refresh_failed,
                     ),
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MemoirTypography.bodyMedium,
                 )
             }
             ItemSection(title = stringResource(R.string.model_section_multimodal)) {
@@ -108,12 +109,18 @@ fun OnboardingModelSetupPage(
                 )
             }
             TextButton(onClick = onRefresh) {
-                Text(stringResource(R.string.ocr_models_refresh))
+                Text(
+                    stringResource(R.string.ocr_models_refresh),
+                    style = MemoirTypography.labelLarge,
+                )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onComplete, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.action_done))
+            Text(
+                stringResource(R.string.action_done),
+                style = MemoirTypography.labelLarge,
+            )
         }
     }
 }

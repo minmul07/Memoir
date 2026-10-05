@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 @Composable
 fun DeveloperOptionsScreen(
@@ -69,11 +70,19 @@ fun DeveloperOptionsScreen(
                 TextButton(onClick = {
                     deletion = null
                     if (title == R.string.developer_delete_queue) onDeleteQueue() else onDeleteAllItems()
-                }) { Text(stringResource(R.string.action_delete)) }
+                }) {
+                    Text(
+                        stringResource(R.string.action_delete),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
             },
             dismissButton = {
                 TextButton(onClick = { deletion = null }) {
-                    Text(stringResource(R.string.action_cancel))
+                    Text(
+                        stringResource(R.string.action_cancel),
+                        style = MemoirTypography.labelLarge,
+                    )
                 }
             },
         )

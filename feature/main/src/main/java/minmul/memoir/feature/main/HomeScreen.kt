@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 const val PlaceholderItemId = "placeholder"
 
@@ -28,7 +29,7 @@ fun HomeScreen(
     ) {
         Text(
             text = stringResource(R.string.home_recent_section),
-            style = MaterialTheme.typography.titleSmall,
+            style = MemoirTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
         )
@@ -39,7 +40,7 @@ fun HomeScreen(
         }
         Text(
             text = stringResource(R.string.home_review_section),
-            style = MaterialTheme.typography.titleSmall,
+            style = MemoirTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
         )

@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import minmul.memoir.core.design.R
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 
 @Composable
 fun ItemSection(
@@ -47,7 +48,7 @@ fun ItemSection(
     Column(modifier = modifier) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
+            style = MemoirTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .padding(top = 16.dp, bottom = 8.dp)
@@ -186,7 +187,7 @@ fun DialogItem(
                 {
                     Text(
                         text = selected,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MemoirTypography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

@@ -34,6 +34,7 @@ import minmul.memoir.core.design.component.NavigationItem
 import minmul.memoir.core.design.component.StackScaffold
 import minmul.memoir.core.design.component.ToggleItem
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.AnalysisQueueMode
 
 @Composable
@@ -205,7 +206,10 @@ private fun AnalysisQueueModeDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
+                Text(
+                    stringResource(R.string.action_cancel),
+                    style = MemoirTypography.labelLarge,
+                )
             }
         },
     )

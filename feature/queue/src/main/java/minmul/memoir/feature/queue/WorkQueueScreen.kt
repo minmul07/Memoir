@@ -53,6 +53,7 @@ import minmul.memoir.core.design.analysisStatusText
 import minmul.memoir.core.design.component.MemoirFab
 import minmul.memoir.core.design.llmRuntimeStatusText
 import minmul.memoir.core.design.theme.MemoirTheme
+import minmul.memoir.core.design.theme.MemoirTypography
 import minmul.memoir.core.model.GemmaModel
 import minmul.memoir.core.model.JobStage
 import minmul.memoir.core.model.JobStatus
@@ -106,7 +107,7 @@ fun WorkQueueScreen(
             ) {
                 Text(
                     text = stringResource(R.string.queue_item_count, items.size),
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MemoirTypography.titleSmall,
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
                 AnimatedVisibility(
@@ -129,7 +130,7 @@ fun WorkQueueScreen(
                                 },
                                 label = "queue-status-title",
                             ) { text ->
-                                Text(text, style = MaterialTheme.typography.titleSmall)
+                                Text(text, style = MemoirTypography.titleSmall)
                             }
                             entries.forEach { entry ->
                                 key(entry.item.jobId) {
@@ -309,7 +310,7 @@ private fun SharedTransitionScope.WorkQueueListItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.queue_image_number, entry.number),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MemoirTypography.bodyLarge,
             )
             // Both shared-bound copies use the same transition, so the subtitle shrinks
             // while the row travels and the title settles at the vertical center.
@@ -326,13 +327,16 @@ private fun SharedTransitionScope.WorkQueueListItem(
                         entry.item.stage,
                         entry.item.attemptCount
                     ),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MemoirTypography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
         TextButton(onClick = { onCancel(entry.item.jobId) }, enabled = enabled) {
-            Text(stringResource(R.string.action_cancel))
+            Text(
+                stringResource(R.string.action_cancel),
+                style = MemoirTypography.labelLarge,
+            )
         }
     }
 }
