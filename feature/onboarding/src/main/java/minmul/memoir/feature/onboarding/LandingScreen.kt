@@ -1,5 +1,6 @@
 package minmul.memoir.feature.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,24 +27,29 @@ fun LandingScreen(
     onContinue: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
-        Text(
-            text = stringResource(R.string.onboarding_welcome),
-            style = MemoirTypography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = onContinue) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
-                stringResource(R.string.action_continue),
-                style = MemoirTypography.labelLarge,
+                text = stringResource(R.string.onboarding_welcome),
+                style = MemoirTypography.headlineMedium,
             )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = onContinue) {
+                Text(
+                    stringResource(R.string.action_continue),
+                    style = MemoirTypography.labelLarge,
+                )
+            }
         }
     }
 }
@@ -49,6 +57,14 @@ fun LandingScreen(
 @Preview(showBackground = true)
 @Composable
 private fun LandingScreenPreview() {
+    MemoirTheme {
+        LandingScreen(onContinue = {})
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun LandingScreenDarkPreview() {
     MemoirTheme {
         LandingScreen(onContinue = {})
     }

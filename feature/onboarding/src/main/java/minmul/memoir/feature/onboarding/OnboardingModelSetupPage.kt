@@ -1,5 +1,6 @@
 package minmul.memoir.feature.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,13 +53,17 @@ fun OnboardingModelSetupPage(
     savingModels: Set<GemmaModel> = emptySet(),
     refreshFailed: Boolean = false,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.Start,
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.Start,
+        ) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -122,12 +128,34 @@ fun OnboardingModelSetupPage(
                 style = MemoirTypography.labelLarge,
             )
         }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingModelSetupPagePreview() {
+    MemoirTheme {
+        OnboardingModelSetupPage(
+            onComplete = {},
+            gemmaModels = listOf(
+                GemmaModelState(GemmaModel.E4B, GemmaModelStatus.Missing),
+                GemmaModelState(GemmaModel.E2B, GemmaModelStatus.Downloading, 42, 100),
+            ),
+            recommendedOcrModel = OcrModelState(OcrModel.Korean, OcrModelStatus.Ready),
+            onInstallGemma = {},
+            onCancelGemma = {},
+            onSelectGemma = {},
+            onInstallOcr = {},
+            onRefresh = {},
+            preferencesLoaded = true,
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OnboardingModelSetupPageDarkPreview() {
     MemoirTheme {
         OnboardingModelSetupPage(
             onComplete = {},

@@ -1,5 +1,6 @@
 package minmul.memoir.feature.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,65 +44,70 @@ fun OnboardingPermissionRequestScreen(
 ) {
     var showCollectionInfo by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start,
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
-        Text(
-            text = stringResource(R.string.onboarding_permission_title),
-            style = MemoirTypography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.height(36.dp))
-        Text(
-            text = stringResource(R.string.onboarding_permission_body_1),
-            style = MemoirTypography.bodyLarge,
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.onboarding_permission_body_2),
-            style = MemoirTypography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.onboarding_collection_info_action),
-            modifier = Modifier.clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Button,
-            ) { showCollectionInfo = true },
-            style = MemoirTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
-            textDecoration = TextDecoration.Underline,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start,
         ) {
-            OutlinedButton(
-                onClick = onContinue,
-                enabled = buttonsEnabled,
-                modifier = Modifier.weight(1f),
+            Text(
+                text = stringResource(R.string.onboarding_permission_title),
+                style = MemoirTypography.headlineMedium,
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Text(
+                text = stringResource(R.string.onboarding_permission_body_1),
+                style = MemoirTypography.bodyLarge,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.onboarding_permission_body_2),
+                style = MemoirTypography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.onboarding_collection_info_action),
+                modifier = Modifier.clickable(
+                    interactionSource = null,
+                    indication = null,
+                    role = Role.Button,
+                ) { showCollectionInfo = true },
+                style = MemoirTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+                textDecoration = TextDecoration.Underline,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(R.string.action_later),
-                    style = MemoirTypography.labelLarge,
-                )
-            }
-            Button(
-                onClick = onRequestPermission,
-                enabled = buttonsEnabled,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(
-                    stringResource(R.string.action_request_permission),
-                    style = MemoirTypography.labelLarge,
-                )
+                OutlinedButton(
+                    onClick = onContinue,
+                    enabled = buttonsEnabled,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        stringResource(R.string.action_later),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
+                Button(
+                    onClick = onRequestPermission,
+                    enabled = buttonsEnabled,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        stringResource(R.string.action_request_permission),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
             }
         }
     }
@@ -136,6 +142,14 @@ fun OnboardingPermissionRequestScreen(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingPermissionRequestScreenPreview() {
+    MemoirTheme {
+        OnboardingPermissionRequestScreen(onContinue = {}, onRequestPermission = {})
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OnboardingPermissionRequestScreenDarkPreview() {
     MemoirTheme {
         OnboardingPermissionRequestScreen(onContinue = {}, onRequestPermission = {})
     }

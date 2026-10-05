@@ -1,5 +1,6 @@
 package minmul.memoir.feature.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,55 +33,60 @@ fun OnboardingCrashlyticsRequestScreen(
     isSaving: Boolean = false,
     hasSaveError: Boolean = false,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .systemBarsPadding()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start,
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
-        Text(
-            text = stringResource(R.string.onboarding_crashlytics_title),
-            style = MemoirTypography.headlineMedium,
-        )
-        Spacer(modifier = Modifier.height(36.dp))
-        Text(
-            text = stringResource(R.string.onboarding_crashlytics_body),
-            style = MemoirTypography.bodyLarge,
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        if (hasSaveError) {
-            Text(
-                text = stringResource(R.string.settings_crash_reports_failed),
-                color = MaterialTheme.colorScheme.error,
-                style = MemoirTypography.bodyMedium,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start,
         ) {
-            OutlinedButton(
-                onClick = onDisagree,
-                enabled = !isSaving,
-                modifier = Modifier.weight(1f),
-            ) {
+            Text(
+                text = stringResource(R.string.onboarding_crashlytics_title),
+                style = MemoirTypography.headlineMedium,
+            )
+            Spacer(modifier = Modifier.height(36.dp))
+            Text(
+                text = stringResource(R.string.onboarding_crashlytics_body),
+                style = MemoirTypography.bodyLarge,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            if (hasSaveError) {
                 Text(
-                    stringResource(R.string.action_disagree),
-                    style = MemoirTypography.labelLarge,
+                    text = stringResource(R.string.settings_crash_reports_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MemoirTypography.bodyMedium,
                 )
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            Button(
-                onClick = onContinue,
-                enabled = !isSaving,
-                modifier = Modifier.weight(1f),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(R.string.action_agree),
-                    style = MemoirTypography.labelLarge,
-                )
+                OutlinedButton(
+                    onClick = onDisagree,
+                    enabled = !isSaving,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        stringResource(R.string.action_disagree),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
+                Button(
+                    onClick = onContinue,
+                    enabled = !isSaving,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        stringResource(R.string.action_agree),
+                        style = MemoirTypography.labelLarge,
+                    )
+                }
             }
         }
     }
@@ -88,6 +95,14 @@ fun OnboardingCrashlyticsRequestScreen(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingCrashlyticsRequestScreenPreview() {
+    MemoirTheme {
+        OnboardingCrashlyticsRequestScreen(onContinue = {}, onDisagree = {})
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OnboardingCrashlyticsRequestScreenDarkPreview() {
     MemoirTheme {
         OnboardingCrashlyticsRequestScreen(onContinue = {}, onDisagree = {})
     }
